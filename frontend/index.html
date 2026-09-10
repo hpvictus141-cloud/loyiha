@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OmborXona - Professional Omborxona Boshqaruv Tizimi</title>
+  <meta name="description" content="Real korxonalar uchun professional omborxona boshqaruv tizimi">
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/landing.css">
+</head>
+<body>
+<header class="landing-header" id="main-header">
+  <nav class="landing-nav">
+    <div class="brand">
+      <div class="brand-logo">
+        <svg width="20" height="20" fill="none" stroke="#fff" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+        </svg>
+      </div>
+      <span class="brand-name">OmborXona</span>
+    </div>
+    <div class="nav-links">
+      <a href="#about">Tizim haqida</a>
+      <a href="#features">Afzalliklar</a>
+      <a href="#modules">Modullar</a>
+      <a href="#security">Xavfsizlik</a>
+      <a href="#faq">Savollar</a>
+      <a href="#contact">Bog'lanish</a>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-toggle" id="theme-toggle" onclick="ThemeManager.toggle()" title="Mavzuni o'zgartirish">
+        <svg class="theme-icon-light" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+        </svg>
+        <svg class="theme-icon-dark" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+        </svg>
+      </button>
+      <a href="login.html" class="btn btn-outline btn-sm">Kirish</a>
+      <a href="login.html" class="btn btn-primary btn-sm">Boshlash</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+<!-- Hero -->
+<section class="hero" id="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Professional darajadagi tizim
+      </div>
+      <h1>Omboringizni <span>to'liq nazorat</span> qiling</h1>
+      <p>Real vaqtda kirim-chiqim, qoldiq kuzatuvi, hisobotlar va xavfsiz foydalanuvchi boshqaruvi. Korxonangiz uchun ishonchli, zamonaviy yechim.</p>
+      <div class="hero-actions">
+        <a href="login.html" class="btn btn-primary btn-lg">Tizimga kirish</a>
+        <a href="#about" class="btn btn-secondary btn-lg">Batafsil ma'lumot</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats bar -->
+<div class="stats-bar">
+  <div class="container">
+    <div class="stat-item">
+      <div class="stat-number">99.9%</div>
+      <div class="stat-label">Ishonchlilik darajasi</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">12+</div>
+      <div class="stat-label">Asosiy modul</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">3</div>
+      <div class="stat-label">Foydalanuvchi roli</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">24/7</div>
+      <div class="stat-label">Monitoring imkoniyati</div>
+    </div>
+  </div>
+</div>
+
+<!-- About -->
+<section class="section" id="about">
+  <div class="container">
+    <div class="section-label">Tizim haqida</div>
+    <h2 class="section-title">Professional omborxona boshqaruvi</h2>
+    <p class="section-subtitle">OmborXona — real korxonalar uchun ishlab chiqilgan, kengaytirishga qulay, xavfsiz va zamonaviy omborxona boshqaruv platformasi.</p>
+    <div class="features-grid" style="margin-top:48px">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="24" height="24" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        </div>
+        <h3 class="feature-title">Real vaqt tahlili</h3>
+        <p class="feature-desc">Omborxona qoldig'i, kirim-chiqimlar va statistikani real vaqt rejimida kuzatib boring.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="24" height="24" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        </div>
+        <h3 class="feature-title">Xavfsizlik tizimi</h3>
+        <p class="feature-desc">JWT autentifikatsiya, rol asosida kirish nazorati va barcha harakatlarni ro'yxatga olish.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="24" height="24" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        </div>
+        <h3 class="feature-title">Keng hisobotlar</h3>
+        <p class="feature-desc">Kunlik, haftalik, oylik va yillik hisobotlarni PDF va Excel formatida yuklab oling.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="section section-alt" id="features">
+  <div class="container">
+    <div class="section-label">Afzalliklar</div>
+    <h2 class="section-title">Nima uchun OmborXona?</h2>
+    <p class="section-subtitle">Raqobatchilardan farqli o'laroq, bizning tizim korxonangizning barcha ehtiyojlarini qamrab oladi.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="24" height="24" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+        <h3 class="feature-title">Yuqori tezlik</h3>
+        <p class="feature-desc">Optimallashtirilgan ma'lumotlar bazasi va server tufayli tizim tez ishlaydi.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="24" height="24" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg></div>
+        <h3 class="feature-title">Responsive dizayn</h3>
+        <p class="feature-desc">Kompyuter, planshet va mobil qurilmalardan qulay foydalanish imkoniyati.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="24" height="24" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg></div>
+        <h3 class="feature-title">Ma'lumot xavfsizligi</h3>
+        <p class="feature-desc">PostgreSQL ma'lumotlar bazasi va muntazam zaxira nusxalari orqali ma'lumotlaringiz himoyada.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="24" height="24" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+        <h3 class="feature-title">Rol boshqaruvi</h3>
+        <p class="feature-desc">Admin, Operator va Omborchi rollarini boshqaring, har biriga alohida ruxsatlar bering.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="24" height="24" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg></div>
+        <h3 class="feature-title">Ogohlantirishlar</h3>
+        <p class="feature-desc">Minimal qoldiqdan past tushganda avtomatik ogohlantirish va bildirishnomalar.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="24" height="24" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg></div>
+        <h3 class="feature-title">Import/Export</h3>
+        <p class="feature-desc">Ma'lumotlarni PDF va Excel formatlarida eksport qilish imkoniyati.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Modules -->
+<section class="section" id="modules">
+  <div class="container">
+    <div class="section-label">Modullar</div>
+    <h2 class="section-title">Barcha boshqaruv modullari</h2>
+    <p class="section-subtitle">Omborxona faoliyatining har bir jihati alohida modul sifatida qurilgan.</p>
+    <div class="modules-grid">
+      <div class="module-item">
+        <div class="module-icon"><svg width="20" height="20" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg></div>
+        <div class="module-name">Dashboard</div>
+        <div class="module-desc">Umumiy statistika va ko'rsatkichlar</div>
+      </div>
+      <div class="module-item">
+        <div class="module-icon"><svg width="20" height="20" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></div>
+        <div class="module-name">Mahsulotlar</div>
+        <div class="module-desc">Mahsulot katalogi va boshqaruv</div>
+      </div>
+      <div class="module-item">
+        <div class="module-icon"><svg width="20" height="20" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg></div>
+        <div class="module-name">Kategoriyalar</div>
+        <div class="module-desc">Mahsulot guruhlari</div>
+      </div>
+      <div class="module-item">
+        <div class="module-icon"><svg width="20" height="20" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+        <div class="module-name">Kirim</div>
+        <div class="module-desc">Mahsulot kirim operatsiyalari</div>
+      </div>
+      <div class="module-item">
+        <div class="module-icon"><svg width="20" height="20" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg></div>
+        <div class="module-name">Chiqim</div>
+        <div class="module-desc">Mahsulot chiqim operatsiyalari</div>
+      </div>
+      <div class="module-item">
+        <div class="module-icon"><svg width="20" height="20" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10"/></svg></div>
+        <div class="module-name">Qoldiq</div>
+        <div class="module-desc">Real vaqt ombor holati</div>
+      </div>
+      <div class="module-item">
+        <div class="module-icon"><svg width="20" height="20" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5"/></svg></div>
+        <div class="module-name">Yetkazib beruvchilar</div>
+        <div class="module-desc">Hamkorlar bazasi</div>
+      </div>
+      <div class="module-item">
+        <div class="module-icon"><svg width="20" height="20" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+        <div class="module-name">Hisobotlar</div>
+        <div class="module-desc">PDF va Excel eksport</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Security -->
+<section class="section section-alt" id="security">
+  <div class="container">
+    <div class="section-label">Xavfsizlik</div>
+    <h2 class="section-title">Ko'p qatlamli xavfsizlik</h2>
+    <p class="section-subtitle">Korxona ma'lumotlarini himoya qilish uchun zamonaviy xavfsizlik protokollari qo'llaniladi.</p>
+    <div class="security-grid">
+      <div class="security-item">
+        <div class="security-icon"><svg width="22" height="22" fill="none" stroke="var(--success)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg></div>
+        <div class="security-content"><h4>JWT Autentifikatsiya</h4><p>Access va refresh tokenlar bilan ikki bosqichli autentifikatsiya tizimi.</p></div>
+      </div>
+      <div class="security-item">
+        <div class="security-icon"><svg width="22" height="22" fill="none" stroke="var(--success)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
+        <div class="security-content"><h4>Rol asosida kirish</h4><p>Har bir foydalanuvchi faqat o'z vakolatiga mos funksiyalarga kirishi mumkin.</p></div>
+      </div>
+      <div class="security-item">
+        <div class="security-icon"><svg width="22" height="22" fill="none" stroke="var(--success)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg></div>
+        <div class="security-content"><h4>Parol shifrlash</h4><p>Barcha parollar bcrypt algoritmida 12 ta salt bilan shifrlanadi.</p></div>
+      </div>
+      <div class="security-item">
+        <div class="security-icon"><svg width="22" height="22" fill="none" stroke="var(--success)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div>
+        <div class="security-content"><h4>Audit loglari</h4><p>Tizimda bajariladigan barcha harakatlar IP manzil va brauzer ma'lumotlari bilan qayd etiladi.</p></div>
+      </div>
+      <div class="security-item">
+        <div class="security-icon"><svg width="22" height="22" fill="none" stroke="var(--success)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg></div>
+        <div class="security-content"><h4>Rate Limiting</h4><p>Brute force hujumlaridan himoya qilish uchun so'rovlar chastotasi cheklanadi.</p></div>
+      </div>
+      <div class="security-item">
+        <div class="security-icon"><svg width="22" height="22" fill="none" stroke="var(--success)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
+        <div class="security-content"><h4>CORS va Helmet</h4><p>HTTP so'rovlarni himoya qilish va xavfli headerlarni oldini olish.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="container" style="text-align:center">
+    <div class="section-label">Tez-tez beriladigan savollar</div>
+    <h2 class="section-title">Savol va javoblar</h2>
+    <p class="section-subtitle" style="margin:0 auto 0">Tizim haqida eng ko'p beriladigan savollarga javoblar.</p>
+    <div class="faq-list" style="margin-top:48px;text-align:left">
+      <div class="faq-item">
+        <div class="faq-question">Tizimdan qanday foydalanishni boshlash mumkin?
+          <svg class="faq-arrow" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="faq-answer"><p>Backend serverni o'rnatib, ma'lumotlar bazasini yaratgandan so'ng, login sahifasidan ro'yxatdan o'tishingiz mumkin. Birinchi ro'yxatdan o'tgan foydalanuvchi avtomatik admin huquqiga ega bo'ladi.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Bir nechta foydalanuvchi bir vaqtda ishlashi mumkinmi?
+          <svg class="faq-arrow" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="faq-answer"><p>Ha, tizim bir vaqtda cheksiz foydalanuvchini qo'llab-quvvatlaydi. Har bir foydalanuvchi o'z roli asosida tizimga kiradi va faqat o'z vakolatlariga mos funksiyalardan foydalanadi.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Hisobotlarni qanday formatda yuklash mumkin?
+          <svg class="faq-arrow" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="faq-answer"><p>Tizim PDF va Excel (XLSX) formatlarida hisobotlarni eksport qilishni qo'llab-quvvatlaydi. Bundan tashqari, hisobotlarni to'g'ridan-to'g'ri printerga yuborish ham mumkin.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Ma'lumotlar xavfsizligi qanday ta'minlanadi?
+          <svg class="faq-arrow" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="faq-answer"><p>Ma'lumotlar PostgreSQL ma'lumotlar bazasida saqlanadi. Barcha parollar bcrypt bilan shifrlanadi. JWT tokenlar orqali sessiyalar boshqariladi. Barcha harakatlar audit logga yozib boriladi.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Tizimni korporativ serverga o'rnatish mumkinmi?
+          <svg class="faq-arrow" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+        <div class="faq-answer"><p>Ha, tizim Node.js va PostgreSQL o'rnatilgan istalgan serverga joylashtirilishi mumkin. Docker orqali ham deploy qilish imkoniyati mavjud.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contact -->
+<section class="section section-alt" id="contact">
+  <div class="container">
+    <div class="section-label">Bog'lanish</div>
+    <h2 class="section-title">Biz bilan bog'laning</h2>
+    <p class="section-subtitle">Savollaringiz bo'lsa, bizga murojaat qiling.</p>
+    <div class="contact-grid">
+      <div class="contact-form">
+        <div class="form-group">
+          <label class="form-label">Ismingiz</label>
+          <input type="text" class="form-control" placeholder="To'liq ismingizni kiriting" onkeypress="return Utils.allowOnlyLetters(event)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Login</label>
+          <input type="text" class="form-control" placeholder="login">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Xabar</label>
+          <textarea class="form-control" rows="5" placeholder="Xabaringizni yozing..."></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="Toast.success('Xabaringiz qabul qilindi')">Yuborish</button>
+      </div>
+      <div class="contact-info">
+        <h3 style="font-size:20px;margin-bottom:20px">Aloqa ma'lumotlari</h3>
+        <div class="contact-info-item">
+          <div class="feature-icon" style="flex-shrink:0">
+            <svg width="20" height="20" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+          </div>
+          <div>
+            <p style="font-size:14px;font-weight:600;margin-bottom:4px">Telefon</p>
+            <p style="font-size:14px;color:var(--text-secondary)">+998 90 000 00 00</p>
+          </div>
+        </div>
+        <div class="contact-info-item">
+          <div class="feature-icon" style="flex-shrink:0">
+            <svg width="20" height="20" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          </div>
+          <div>
+            <p style="font-size:14px;font-weight:600;margin-bottom:4px">Kontakt</p>
+            <p style="font-size:14px;color:var(--text-secondary)">info@omborxona.uz</p>
+          </div>
+        </div>
+        <div class="contact-info-item">
+          <div class="feature-icon" style="flex-shrink:0">
+            <svg width="20" height="20" fill="none" stroke="var(--primary)" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <div>
+            <p style="font-size:14px;font-weight:600;margin-bottom:4px">Manzil</p>
+            <p style="font-size:14px;color:var(--text-secondary)">Toshkent, O'zbekiston</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="landing-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="brand" style="margin-bottom:12px">
+          <div class="brand-logo"><svg width="18" height="18" fill="none" stroke="#fff" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg></div>
+          <span style="color:#f9fafb;font-size:17px;font-weight:700">OmborXona</span>
+        </div>
+        <p>Professional omborxona boshqaruv tizimi. Real korxonalar uchun ishlab chiqilgan.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Tizim</h4>
+        <ul>
+          <li><a href="#about">Haqida</a></li>
+          <li><a href="#features">Afzalliklar</a></li>
+          <li><a href="#modules">Modullar</a></li>
+          <li><a href="#security">Xavfsizlik</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Modullar</h4>
+        <ul>
+          <li><a href="login.html">Dashboard</a></li>
+          <li><a href="login.html">Mahsulotlar</a></li>
+          <li><a href="login.html">Hisobotlar</a></li>
+          <li><a href="login.html">Foydalanuvchilar</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Yordam</h4>
+        <ul>
+          <li><a href="#faq">Savollar</a></li>
+          <li><a href="#contact">Bog'lanish</a></li>
+          <li><a href="login.html">Kirish</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2025 OmborXona. Barcha huquqlar himoyalangan.</span>
+      <span>Professional Omborxona Boshqaruv Tizimi</span>
+    </div>
+  </div>
+</footer>
+
+<div id="toast-container" class="toast-container"></div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/utils.js"></script>
+<script src="assets/js/auth.js"></script>
+<script>
+  ThemeManager.init();
+
+  document.querySelectorAll('.faq-question').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+
+  const header = document.getElementById('main-header');
+  window.addEventListener('scroll', () => {
+    header.style.boxShadow = window.scrollY > 10 ? 'var(--shadow-md)' : '';
+  });
+</script>
+</body>
+</html>

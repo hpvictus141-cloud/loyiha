@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sozlamalar - OmborXona</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/global.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main-content">
+    <header class="navbar" id="navbar"></header>
+    <main class="page-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Sozlamalar</h1>
+          <p class="page-subtitle">Tizim va korxona sozlamalari</p>
+        </div>
+      </div>
+      <div class="grid" style="grid-template-columns:1fr 1fr;gap:24px">
+        <!-- Company Settings -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Korxona ma'lumotlari</span>
+          </div>
+          <div class="card-body">
+            <form id="settings-form" style="display:flex;flex-direction:column;gap:16px">
+              <div class="form-group">
+                <label class="form-label">Korxona nomi <span style="color:var(--danger)">*</span></label>
+                <input type="text" id="set-companyName" class="form-control" placeholder="Korxona nomi">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Telefon raqami</label>
+                <input type="text" id="set-phone" class="form-control" placeholder="+998 XX XXX XX XX">
+              </div>
+              <div class="form-group">
+                <label class="form-label">STIR</label>
+                <input type="text" id="set-taxId" class="form-control" placeholder="Soliq to'lovchi identifikatsion raqami">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Manzil</label>
+                <textarea id="set-address" class="form-control" rows="2" placeholder="To'liq manzil" style="resize:none;min-height:50px;max-height:140px;overflow-y:auto;"></textarea>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="saveSettings()">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Saqlash
+              </button>
+            </form>
+          </div>
+        </div>
+        <!-- System Settings -->
+        <div style="display:flex;flex-direction:column;gap:24px">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Tizim sozlamalari</span>
+            </div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:16px">
+              <div class="form-group">
+                <label class="form-label">Valyuta</label>
+                <select id="set-currency" class="form-control">
+                  <option value="UZS">O'zbek so'mi (UZS)</option>
+                  <option value="USD">AQSh dollari (USD)</option>
+                  <option value="EUR">Yevro (EUR)</option>
+                  <option value="RUB">Rossiya rubli (RUB)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Sana formati</label>
+                <select id="set-dateFormat" class="form-control">
+                  <option value="DD.MM.YYYY">DD.MM.YYYY (31.12.2025)</option>
+                  <option value="YYYY-MM-DD">YYYY-MM-DD (2025-12-31)</option>
+                  <option value="MM/DD/YYYY">MM/DD/YYYY (12/31/2025)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Interfeys mavzusi</label>
+                <div style="display:flex;gap:12px;margin-top:4px">
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px">
+                    <input type="radio" name="theme-radio" value="light" onchange="ThemeManager.apply('light')" style="accent-color:var(--primary)"> Kunduzgi
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px">
+                    <input type="radio" name="theme-radio" value="dark" onchange="ThemeManager.apply('dark')" style="accent-color:var(--primary)"> Tungi
+                  </label>
+                </div>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="saveSystemSettings()">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Saqlash
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Ma'lumotlar bazasi</span>
+            </div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:12px">
+              <p style="font-size:14px;color:var(--text-secondary)">Ma'lumotlar bazasi zaxira nusxasini yaratish yoki tiklash.</p>
+              <div style="display:flex;gap:10px">
+                <button class="btn btn-secondary" onclick="Toast.info('Zaxira nusxa yaratish uchun server administratorga murojaat qiling')">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                  Zaxira yaratish
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/utils.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script>
+  if (!Layout.init()) throw new Error('Auth failed');
+  Layout.setBreadcrumb([{label: 'Boshqaruv'}, {label: 'Sozlamalar'}]);
+
+  const currentTheme = ThemeManager.getCurrent();
+  document.querySelectorAll('input[name="theme-radio"]').forEach(r => {
+    r.checked = r.value === currentTheme;
+  });
+
+  // Telefon inputni sozlash
+  Utils.setupPhoneInput('set-phone');
+  Utils.setupAutoGrow('set-address', 140);
+
+  async function loadSettings() {
+    try {
+      const data = await api.get('/settings');
+      const s = data.data;
+      document.getElementById('set-companyName').value = s.companyName || '';
+      document.getElementById('set-phone').value = s.phone || '';
+      document.getElementById('set-taxId').value = s.taxId || '';
+      document.getElementById('set-address').value = s.address || '';
+      document.getElementById('set-currency').value = s.currency || 'so\'m';
+      document.getElementById('set-dateFormat').value = s.dateFormat || 'DD.MM.YYYY';
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  async function saveSettings() {
+    const name = document.getElementById('set-companyName').value.trim();
+    if (!name) { Toast.error('Korxona nomi talab qilinadi'); return; }
+    try {
+      await api.put('/settings', {
+        companyName: name,
+        phone: document.getElementById('set-phone').value.trim() || undefined,
+        taxId: document.getElementById('set-taxId').value.trim() || undefined,
+        address: document.getElementById('set-address').value.trim() || undefined,
+        currency: document.getElementById('set-currency').value,
+        dateFormat: document.getElementById('set-dateFormat').value
+      });
+      Toast.success('Sozlamalar saqlandi');
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  function saveSystemSettings() {
+    Toast.success('Tizim sozlamalari saqlandi');
+  }
+
+  loadSettings();
+</script>
+</body>
+</html>

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mahsulotlar - OmborXona</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/global.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main-content">
+    <header class="navbar" id="navbar"></header>
+    <main class="page-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Mahsulotlar</h1>
+          <p class="page-subtitle">Mahsulotlar ro'yxatini boshqarish</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal()" id="add-product-btn">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Yangi mahsulot
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="toolbar" style="margin:0;flex:1">
+            <div class="toolbar-left">
+              <div class="search-bar">
+                <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" id="search-input" class="form-control" placeholder="Mahsulot nomi, kodi..." style="width:260px">
+              </div>
+              <select id="category-filter" class="form-control" style="width:180px">
+                <option value="">Barcha kategoriyalar</option>
+              </select>
+              <select id="status-filter" class="form-control" style="width:140px">
+                <option value="">Barcha holat</option>
+                <option value="true">Faol</option>
+                <option value="false">Faol emas</option>
+              </select>
+            </div>
+            <div class="toolbar-right">
+              <span id="total-count" class="text-sm text-muted"></span>
+            </div>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Kod</th>
+                <th>Nomi</th>
+                <th>Kategoriya</th>
+                <th>O'lchov</th>
+                <th>Qoldiq</th>
+                <th>Sotib olish narxi</th>
+                <th>Sotish narxi</th>
+                <th>Holat</th>
+                <th style="width:100px">Amallar</th>
+              </tr>
+            </thead>
+            <tbody id="products-table"></tbody>
+          </table>
+        </div>
+        <div class="card-footer" style="display:flex;align-items:center;justify-content:space-between">
+          <span id="page-info" class="text-sm text-muted"></span>
+          <div id="pagination"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Product Modal -->
+<div class="modal-overlay" id="product-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modal-title">Yangi mahsulot</h3>
+      <button class="modal-close" onclick="closeModal()">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <form id="product-form" novalidate>
+        <div class="grid grid-2" style="gap:16px">
+          <div class="form-group">
+            <label class="form-label">Mahsulot kodi <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="code" class="form-control" placeholder="Masalan: MP-001">
+            <span id="code-error" class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mahsulot nomi <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="name" class="form-control" placeholder="Mahsulot nomi">
+            <span id="name-error" class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kategoriya <span style="color:var(--danger)">*</span></label>
+            <select id="categoryId" class="form-control">
+              <option value="">Kategoriya tanlang</option>
+            </select>
+            <span id="categoryId-error" class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">O'lchov birligi <span style="color:var(--danger)">*</span></label>
+            <select id="unitId" class="form-control">
+              <option value="">O'lchov birligini tanlang</option>
+            </select>
+            <span id="unitId-error" class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sotib olish narxi <span style="color:var(--danger)">*</span></label>
+            <input type="number" id="purchasePrice" class="form-control" placeholder="0" min="0" step="0.01">
+            <span id="purchasePrice-error" class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sotish narxi <span style="color:var(--danger)">*</span></label>
+            <input type="number" id="salePrice" class="form-control" placeholder="0" min="0" step="0.01">
+            <span id="salePrice-error" class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Minimal qoldiq</label>
+            <input type="number" id="minStock" class="form-control" placeholder="0" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Shtrix-kod</label>
+            <input type="text" id="barcode" class="form-control" placeholder="Shtrix-kod (ixtiyoriy)">
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Izoh</label>
+            <textarea id="description" class="form-control" rows="3" placeholder="Qo'shimcha izoh..."></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Bekor qilish</button>
+      <button class="btn btn-primary" id="save-btn" onclick="saveProduct()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/utils.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script>
+  if (!Layout.init()) throw new Error('Auth failed');
+  Layout.setBreadcrumb([{label: 'Ma\'lumotlar'}, {label: 'Mahsulotlar'}]);
+
+  let currentPage = 1;
+  let editingId = null;
+  let categories = [];
+  let units = [];
+
+  const user = Auth.getUser();
+  const isAdmin = user?.role?.name === 'Admin';
+
+  // Admin bo'lmasa "Yangi mahsulot" tugmasini yashirish
+  if (!isAdmin) {
+    const addBtn = document.getElementById('add-product-btn');
+    if (addBtn) addBtn.style.display = 'none';
+  }
+
+  const searchInput = document.getElementById('search-input');
+  const categoryFilter = document.getElementById('category-filter');
+  const statusFilter = document.getElementById('status-filter');
+
+  searchInput.addEventListener('input', Utils.debounce(() => { currentPage = 1; loadProducts(); }, 400));
+  categoryFilter.addEventListener('change', () => { currentPage = 1; loadProducts(); });
+  statusFilter.addEventListener('change', () => { currentPage = 1; loadProducts(); });
+
+  async function init() {
+    await Promise.all([loadCategories(), loadUnits()]);
+    loadProducts();
+  }
+
+  async function loadCategories() {
+    try {
+      const data = await api.get('/categories', { isActive: 'true' });
+      categories = data.data;
+      const sel = document.getElementById('category-filter');
+      sel.innerHTML = '<option value="">Barcha kategoriyalar</option>' +
+        categories.map(c => `<option value="${c.id}">${Utils.escapeHtml(c.name)}</option>`).join('');
+      const sel2 = document.getElementById('categoryId');
+      sel2.innerHTML = '<option value="">Kategoriya tanlang</option>' +
+        categories.map(c => `<option value="${c.id}">${Utils.escapeHtml(c.name)}</option>`).join('');
+    } catch (e) {}
+  }
+
+  async function loadUnits() {
+    try {
+      const data = await api.get('/units');
+      units = data.data;
+      const sel = document.getElementById('unitId');
+      sel.innerHTML = '<option value="">O\'lchov birligini tanlang</option>' +
+        units.map(u => `<option value="${u.id}">${Utils.escapeHtml(u.name)} (${u.symbol})</option>`).join('');
+    } catch (e) {}
+  }
+
+  async function loadProducts() {
+    const tbody = document.getElementById('products-table');
+    tbody.innerHTML = Utils.getSkeletonRows(9, 5);
+    try {
+      const params = { page: currentPage, limit: 15 };
+      const s = searchInput.value.trim();
+      const c = categoryFilter.value;
+      const st = statusFilter.value;
+      if (s) params.search = s;
+      if (c) params.categoryId = c;
+      if (st) params.isActive = st;
+
+      const data = await api.get('/products', params);
+      renderTable(data.data);
+
+      const p = data.pagination;
+      document.getElementById('total-count').textContent = `Jami: ${p.total} ta`;
+      document.getElementById('page-info').textContent = `${((p.page-1)*p.limit)+1}-${Math.min(p.page*p.limit, p.total)} / ${p.total}`;
+
+      const paginationEl = document.getElementById('pagination');
+      paginationEl.innerHTML = Utils.generatePaginationHTML(p);
+      Utils.setupPagination(paginationEl, (pg) => { currentPage = pg; loadProducts(); });
+    } catch (e) {
+      Toast.error(e.message);
+      tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--danger)">${e.message}</td></tr>`;
+    }
+  }
+
+  function renderTable(products) {
+    const user = Auth.getUser();
+    const isAdmin = user?.role?.name === 'Admin';
+    
+    const tbody = document.getElementById('products-table');
+    if (!products.length) {
+      tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-state-title">Mahsulot topilmadi</div><p class="empty-state-description">Yangi mahsulot qo'shish uchun "Yangi mahsulot" tugmasini bosing</p></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = products.map(p => {
+      const isLow = parseFloat(p.currentStock) <= parseFloat(p.minStock);
+      return `<tr>
+        <td><span class="badge badge-secondary">${Utils.escapeHtml(p.code)}</span></td>
+        <td><span style="font-weight:500">${Utils.escapeHtml(p.name)}</span>${p.barcode ? `<br><span class="text-xs text-muted">${Utils.escapeHtml(p.barcode)}</span>` : ''}</td>
+        <td>${Utils.escapeHtml(p.category?.name || '-')}</td>
+        <td>${Utils.escapeHtml(p.unit?.symbol || '-')}</td>
+        <td><span style="font-weight:600;color:${isLow ? 'var(--danger)' : 'var(--success)'}">${Utils.formatNumber(p.currentStock)}</span>${isLow ? ' <span class="badge badge-danger" style="font-size:10px">Kam</span>' : ''}</td>
+        <td>${Utils.formatCurrency(p.purchasePrice)}</td>
+        <td>${Utils.formatCurrency(p.salePrice)}</td>
+        <td><span class="badge ${p.isActive ? 'badge-success' : 'badge-secondary'}">${p.isActive ? 'Faol' : 'Faol emas'}</span></td>
+        <td>
+          ${isAdmin ? `
+          <div class="table-actions">
+            <button class="btn btn-secondary btn-sm btn-icon" onclick="editProduct('${p.id}')" title="Tahrirlash">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            </button>
+            <button class="btn btn-danger btn-sm btn-icon" onclick="deleteProduct('${p.id}', '${Utils.escapeHtml(p.name)}')" title="O'chirish">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </div>
+          ` : '<span class="text-muted text-sm">-</span>'}
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function openModal(id = null) {
+    editingId = id;
+    document.getElementById('modal-title').textContent = id ? 'Mahsulotni tahrirlash' : 'Yangi mahsulot';
+    clearForm();
+    document.getElementById('product-modal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('product-modal').classList.remove('active');
+    editingId = null;
+    clearForm();
+  }
+
+  function clearForm() {
+    ['code','name','categoryId','unitId','purchasePrice','salePrice','minStock','barcode','description'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    ['code','name','categoryId','unitId','purchasePrice','salePrice'].forEach(id => {
+      const el = document.getElementById(id + '-error');
+      if (el) el.textContent = '';
+    });
+  }
+
+  async function editProduct(id) {
+    try {
+      const data = await api.get(`/products/${id}`);
+      const p = data.data;
+      openModal(id);
+      document.getElementById('code').value = p.code;
+      document.getElementById('name').value = p.name;
+      document.getElementById('categoryId').value = p.categoryId;
+      document.getElementById('unitId').value = p.unitId;
+      document.getElementById('purchasePrice').value = p.purchasePrice;
+      document.getElementById('salePrice').value = p.salePrice;
+      document.getElementById('minStock').value = p.minStock;
+      document.getElementById('barcode').value = p.barcode || '';
+      document.getElementById('description').value = p.description || '';
+    } catch (e) {
+      Toast.error(e.message);
+    }
+  }
+
+  async function saveProduct() {
+    const fields = ['code','name','categoryId','unitId','purchasePrice','salePrice'];
+    let valid = true;
+    fields.forEach(id => {
+      const el = document.getElementById(id);
+      const err = document.getElementById(id + '-error');
+      if (err) err.textContent = '';
+      if (!el?.value?.trim()) {
+        if (err) err.textContent = 'Bu maydon talab qilinadi';
+        valid = false;
+      }
+    });
+    if (!valid) return;
+
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saqlanmoqda...';
+
+    const body = {
+      code: document.getElementById('code').value.trim(),
+      name: document.getElementById('name').value.trim(),
+      categoryId: document.getElementById('categoryId').value,
+      unitId: document.getElementById('unitId').value,
+      purchasePrice: document.getElementById('purchasePrice').value,
+      salePrice: document.getElementById('salePrice').value,
+      minStock: document.getElementById('minStock').value || '0',
+      barcode: document.getElementById('barcode').value.trim() || undefined,
+      description: document.getElementById('description').value.trim() || undefined
+    };
+
+    try {
+      if (editingId) {
+        await api.put(`/products/${editingId}`, body);
+        Toast.success('Mahsulot yangilandi');
+      } else {
+        await api.post('/products', body);
+        Toast.success('Mahsulot qo\'shildi');
+      }
+      closeModal();
+      loadProducts();
+    } catch (e) {
+      Toast.error(e.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Saqlash';
+    }
+  }
+
+  async function deleteProduct(id, name) {
+    Confirm.show(`"${name}" mahsulotini o'chirishni tasdiqlaysizmi?`, 'O\'chirishni tasdiqlash', async () => {
+      try {
+        await api.delete(`/products/${id}`);
+        Toast.success('Mahsulot o\'chirildi');
+        loadProducts();
+      } catch (e) {
+        Toast.error(e.message);
+      }
+    });
+  }
+
+  document.getElementById('product-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('product-modal')) closeModal();
+  });
+
+  init();
+</script>
+</body>
+</html>

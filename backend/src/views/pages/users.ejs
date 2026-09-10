@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="dark">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+<div class="admin-layout" id="admin-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/navbar') %>
+    <main class="page-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Foydalanuvchilar</h1>
+          <p class="page-subtitle">Tizim foydalanuvchilarini boshqarish</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal()" id="add-user-btn">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Yangi foydalanuvchi
+        </button>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div style="display:flex;gap:12px;flex:1">
+            <div class="search-bar" style="flex:1;max-width:320px">
+              <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input type="text" id="search-input" class="form-control" placeholder="Qidirish...">
+            </div>
+            <select id="role-filter" class="form-control" style="width:180px">
+              <option value="">Barcha rollar</option>
+            </select>
+            <select id="status-filter" class="form-control" style="width:150px">
+              <option value="">Barcha holat</option>
+              <option value="true">Faol</option>
+              <option value="false">Faol emas</option>
+            </select>
+          </div>
+          <span id="total-count" class="text-sm text-muted"></span>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Foydalanuvchi</th>
+                <th>Email</th>
+                <th>Telefon</th>
+                <th>Rol</th>
+                <th>Oxirgi kirish</th>
+                <th>Holat</th>
+                <th style="width:100px">Amallar</th>
+              </tr>
+            </thead>
+            <tbody id="users-table"></tbody>
+          </table>
+        </div>
+        <div class="card-footer" style="display:flex;justify-content:flex-end">
+          <div id="pagination"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- User Modal -->
+<div class="modal-overlay" id="user-modal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modal-title">Yangi foydalanuvchi</h3>
+      <button class="modal-close" onclick="closeModal()">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid grid-2" style="gap:16px">
+        <div class="form-group">
+          <label class="form-label">Username <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="username" class="form-control" placeholder="username">
+          <span id="username-error" class="form-error"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">To'liq ism <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="fullName" class="form-control" placeholder="Ism Familiya">
+          <span id="fullName-error" class="form-error"></span>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:16px">
+        <label class="form-label">Email</label>
+        <input type="email" id="email" class="form-control" placeholder="email@example.com">
+        <span id="email-error" class="form-error"></span>
+      </div>
+      <div class="form-group" style="margin-top:16px">
+        <label class="form-label">Telefon</label>
+        <input type="text" id="phone" class="form-control" placeholder="+998 XX XXX XX XX">
+      </div>
+      <div class="grid grid-2" style="gap:16px;margin-top:16px">
+        <div class="form-group">
+          <label class="form-label">Rol <span style="color:var(--danger)">*</span></label>
+          <select id="roleId" class="form-control">
+            <option value="">Rol tanlang</option>
+          </select>
+          <span id="roleId-error" class="form-error"></span>
+        </div>
+        <div class="form-group" id="password-group">
+          <label class="form-label">Parol <span style="color:var(--danger)">*</span></label>
+          <input type="password" id="password" class="form-control" placeholder="******">
+          <span id="password-error" class="form-error"></span>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:16px" id="active-group">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="isActive" checked style="width:18px;height:18px">
+          <span>Faol holat</span>
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Bekor qilish</button>
+      <button class="btn btn-primary" id="save-btn" onclick="saveUser()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal-overlay" id="password-modal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <h3 class="modal-title">Parolni o'zgartirish</h3>
+      <button class="modal-close" onclick="closePasswordModal()">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Yangi parol <span style="color:var(--danger)">*</span></label>
+        <input type="password" id="newPassword" class="form-control" placeholder="******">
+        <span id="newPassword-error" class="form-error"></span>
+      </div>
+      <div class="form-group" style="margin-top:16px">
+        <label class="form-label">Parolni tasdiqlang <span style="color:var(--danger)">*</span></label>
+        <input type="password" id="confirmPassword" class="form-control" placeholder="******">
+        <span id="confirmPassword-error" class="form-error"></span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closePasswordModal()">Bekor qilish</button>
+      <button class="btn btn-primary" id="password-save-btn" onclick="savePassword()">O'zgartirish</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<%- include('../partials/scripts') %>
+
+<script>
+  if (!Layout.init()) throw new Error('Auth failed');
+  Layout.setBreadcrumb([{label: 'Boshqaruv'}, {label: 'Foydalanuvchilar'}]);
+
+  const user = Auth.getUser();
+  const isAdmin = user?.role?.name === 'Admin';
+  const canManage = isAdmin;
+
+  if (!canManage) {
+    const addBtn = document.getElementById('add-user-btn');
+    if (addBtn) addBtn.style.display = 'none';
+  }
+
+  let currentPage = 1, editingId = null, changingPasswordId = null;
+  let roles = [];
+
+  const searchInput = document.getElementById('search-input');
+  const roleFilter = document.getElementById('role-filter');
+  const statusFilter = document.getElementById('status-filter');
+
+  searchInput.addEventListener('input', Utils.debounce(() => { currentPage = 1; loadUsers(); }, 400));
+  roleFilter.addEventListener('change', () => { currentPage = 1; loadUsers(); });
+  statusFilter.addEventListener('change', () => { currentPage = 1; loadUsers(); });
+
+  async function init() {
+    await loadRoles();
+    loadUsers();
+  }
+
+  async function loadRoles() {
+    try {
+      const data = await api.get('/roles');
+      roles = data.data;
+      const selFilter = document.getElementById('role-filter');
+      const selModal = document.getElementById('roleId');
+      selFilter.innerHTML = '<option value="">Barcha rollar</option>' +
+        roles.map(r => `<option value="${r.id}">${Utils.escapeHtml(r.name)}</option>`).join('');
+      selModal.innerHTML = '<option value="">Rol tanlang</option>' +
+        roles.map(r => `<option value="${r.id}">${Utils.escapeHtml(r.name)}</option>`).join('');
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  async function loadUsers() {
+    const tbody = document.getElementById('users-table');
+    tbody.innerHTML = Utils.getSkeletonRows(7, 5);
+    try {
+      const params = { page: currentPage, limit: 15 };
+      const s = searchInput.value.trim();
+      const r = roleFilter.value;
+      const st = statusFilter.value;
+      if (s) params.search = s;
+      if (r) params.roleId = r;
+      if (st) params.isActive = st;
+      const data = await api.get('/users', params);
+      renderTable(data.data);
+      const p = data.pagination;
+      document.getElementById('total-count').textContent = `Jami: ${p.total} ta`;
+      const paginationEl = document.getElementById('pagination');
+      paginationEl.innerHTML = Utils.generatePaginationHTML(p);
+      Utils.setupPagination(paginationEl, pg => { currentPage = pg; loadUsers(); });
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  function renderTable(users) {
+    const tbody = document.getElementById('users-table');
+    if (!users.length) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state-title">Foydalanuvchi topilmadi</div></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = users.map(u => `<tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:14px">
+            ${Utils.escapeHtml(u.fullName).charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div style="font-weight:500">${Utils.escapeHtml(u.fullName)}</div>
+            <div class="text-muted text-sm">@${Utils.escapeHtml(u.username)}</div>
+          </div>
+        </div>
+      </td>
+      <td class="text-muted">${u.email ? Utils.escapeHtml(u.email) : '-'}</td>
+      <td class="text-muted">${u.phone || '-'}</td>
+      <td><span class="badge badge-info">${Utils.escapeHtml(u.role?.name || '-')}</span></td>
+      <td class="text-muted text-sm">${u.lastLogin ? Utils.formatDate(u.lastLogin, 'DD.MM.YYYY HH:mm') : 'Hech qachon'}</td>
+      <td><span class="badge ${u.isActive ? 'badge-success' : 'badge-secondary'}">${u.isActive ? 'Faol' : 'Faol emas'}</span></td>
+      <td>
+        ${canManage && u.id !== user.id ? `
+        <div class="table-actions">
+          <button class="btn btn-secondary btn-sm btn-icon" onclick="editUser('${u.id}')" title="Tahrirlash">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+          </button>
+          <button class="btn btn-warning btn-sm btn-icon" onclick="changePassword('${u.id}')" title="Parolni o'zgartirish">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+          </button>
+          <button class="btn btn-danger btn-sm btn-icon" onclick="deleteUser('${u.id}', ${JSON.stringify(u.fullName).replace(/"/g, '&quot;')})" title="O'chirish">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          </button>
+        </div>
+        ` : '<span class="text-muted text-sm">-</span>'}
+      </td>
+    </tr>`).join('');
+  }
+
+  function openModal(id = null) {
+    editingId = id;
+    document.getElementById('modal-title').textContent = id ? 'Foydalanuvchini tahrirlash' : 'Yangi foydalanuvchi';
+    document.getElementById('username').value = '';
+    document.getElementById('username').disabled = !!id;
+    document.getElementById('fullName').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('phone').value = '';
+    document.getElementById('roleId').value = '';
+    document.getElementById('password').value = '';
+    document.getElementById('isActive').checked = true;
+    Utils.clearFormErrors('user-modal');
+    
+    if (id) {
+      document.getElementById('password-group').style.display = 'none';
+      document.getElementById('active-group').style.display = 'block';
+    } else {
+      document.getElementById('password-group').style.display = 'block';
+      document.getElementById('active-group').style.display = 'none';
+    }
+    
+    document.getElementById('user-modal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('user-modal').classList.remove('active');
+    editingId = null;
+    Utils.clearFormErrors('user-modal');
+  }
+
+  async function editUser(id) {
+    try {
+      const data = await api.get(`/users/${id}`);
+      const u = data.data;
+      openModal(id);
+      document.getElementById('username').value = u.username;
+      document.getElementById('fullName').value = u.fullName;
+      document.getElementById('email').value = u.email || '';
+      document.getElementById('phone').value = u.phone || '';
+      document.getElementById('roleId').value = u.role?.id || '';
+      document.getElementById('isActive').checked = u.isActive;
+    } catch(e) { Utils.handleApiError(e); }
+  }
+
+  async function saveUser() {
+    Utils.clearFormErrors('user-modal');
+    const username = document.getElementById('username').value.trim();
+    const fullName = document.getElementById('fullName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const roleId = document.getElementById('roleId').value;
+    const password = document.getElementById('password').value.trim();
+    const isActive = document.getElementById('isActive').checked;
+
+    let hasError = false;
+    if (!username && !editingId) { 
+      document.getElementById('username-error').textContent = 'Username talab qilinadi'; 
+      document.getElementById('username').classList.add('is-invalid');
+      hasError = true; 
+    }
+    if (!fullName) { 
+      document.getElementById('fullName-error').textContent = 'To\'liq ism talab qilinadi'; 
+      document.getElementById('fullName').classList.add('is-invalid');
+      hasError = true; 
+    }
+    if (!roleId) { 
+      document.getElementById('roleId-error').textContent = 'Rol talab qilinadi'; 
+      document.getElementById('roleId').classList.add('is-invalid');
+      hasError = true; 
+    }
+    if (!editingId && !password) { 
+      document.getElementById('password-error').textContent = 'Parol talab qilinadi'; 
+      document.getElementById('password').classList.add('is-invalid');
+      hasError = true; 
+    }
+    if (hasError) return;
+
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saqlanmoqda...';
+
+    try {
+      const body = { fullName, email: email || undefined, phone: phone || undefined, roleId };
+      if (editingId) {
+        body.isActive = isActive;
+        await api.put(`/users/${editingId}`, body);
+        Toast.success('Foydalanuvchi yangilandi');
+      } else {
+        body.username = username;
+        body.password = password;
+        await api.post('/users', body);
+        Toast.success('Foydalanuvchi qo\'shildi');
+      }
+      closeModal();
+      loadUsers();
+    } catch(e) { 
+      Utils.handleApiError(e, 'user-modal'); 
+    }
+    finally { btn.disabled = false; btn.textContent = 'Saqlash'; }
+  }
+
+  function changePassword(id) {
+    changingPasswordId = id;
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+    Utils.clearFormErrors('password-modal');
+    document.getElementById('password-modal').classList.add('active');
+  }
+
+  function closePasswordModal() {
+    document.getElementById('password-modal').classList.remove('active');
+    changingPasswordId = null;
+    Utils.clearFormErrors('password-modal');
+  }
+
+  async function savePassword() {
+    Utils.clearFormErrors('password-modal');
+    const newPassword = document.getElementById('newPassword').value.trim();
+    const confirmPassword = document.getElementById('confirmPassword').value.trim();
+
+    let hasError = false;
+    if (!newPassword) { 
+      document.getElementById('newPassword-error').textContent = 'Yangi parol talab qilinadi'; 
+      document.getElementById('newPassword').classList.add('is-invalid');
+      hasError = true; 
+    }
+    if (!confirmPassword) { 
+      document.getElementById('confirmPassword-error').textContent = 'Parolni tasdiqlang'; 
+      document.getElementById('confirmPassword').classList.add('is-invalid');
+      hasError = true; 
+    }
+    if (newPassword && confirmPassword && newPassword !== confirmPassword) {
+      document.getElementById('confirmPassword-error').textContent = 'Parollar mos kelmadi';
+      document.getElementById('confirmPassword').classList.add('is-invalid');
+      hasError = true;
+    }
+    if (hasError) return;
+
+    const btn = document.getElementById('password-save-btn');
+    btn.disabled = true;
+    btn.textContent = 'O\'zgartirmoqda...';
+
+    try {
+      await api.post(`/users/${changingPasswordId}/change-password`, { newPassword });
+      Toast.success('Parol o\'zgartirildi');
+      closePasswordModal();
+    } catch(e) { 
+      Utils.handleApiError(e, 'password-modal'); 
+    }
+    finally { btn.disabled = false; btn.textContent = 'O\'zgartirish'; }
+  }
+
+  async function deleteUser(id, name) {
+    Confirm.show(`"${name}" foydalanuvchisini o'chirishni tasdiqlaysizmi?`, 'O\'chirishni tasdiqlash', async () => {
+      try {
+        await api.delete(`/users/${id}`);
+        Toast.success('Foydalanuvchi o\'chirildi');
+        loadUsers();
+      } catch(e) { 
+        Utils.handleApiError(e); 
+      }
+    });
+  }
+
+  document.getElementById('user-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('user-modal')) closeModal();
+  });
+
+  document.getElementById('password-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('password-modal')) closePasswordModal();
+  });
+
+  Utils.setupPhoneInput('phone');
+  init();
+</script>
+</body>
+</html>

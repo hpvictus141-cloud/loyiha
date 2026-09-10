@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yetkazib Beruvchilar - OmborXona</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/global.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main-content">
+    <header class="navbar" id="navbar"></header>
+    <main class="page-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Yetkazib Beruvchilar</h1>
+          <p class="page-subtitle">Hamkorlar va yetkazib beruvchilar bazasi</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Yangi yetkazib beruvchi
+        </button>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="toolbar" style="margin:0;flex:1">
+            <div class="toolbar-left">
+              <div class="search-bar">
+                <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" id="search-input" class="form-control" placeholder="Korxona nomi, telefon..." style="width:280px">
+              </div>
+            </div>
+            <span id="total-count" class="text-sm text-muted"></span>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Korxona nomi</th>
+                <th>Mas'ul shaxs</th>
+                <th>Telefon</th>
+                <th>Login</th>
+                <th>STIR</th>
+                <th>Manzil</th>
+                <th>Kirimlar</th>
+                <th>Holat</th>
+                <th style="width:100px">Amallar</th>
+              </tr>
+            </thead>
+            <tbody id="suppliers-table"></tbody>
+          </table>
+        </div>
+        <div class="card-footer" style="display:flex;justify-content:flex-end">
+          <div id="pagination"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Supplier Modal -->
+<div class="modal-overlay" id="supplier-modal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modal-title">Yangi yetkazib beruvchi</h3>
+      <button class="modal-close" onclick="closeModal()">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid grid-2" style="gap:16px">
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Korxona nomi <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="sup-companyName" class="form-control" placeholder="Korxona to'liq nomi">
+          <span id="sup-companyName-error" class="form-error"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mas'ul shaxs <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="sup-contactPerson" class="form-control" placeholder="To'liq ism" onkeypress="return Utils.allowOnlyLetters(event)">
+          <span id="sup-contactPerson-error" class="form-error"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Telefon <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="sup-phone" class="form-control" placeholder="+998 XX XXX XX XX">
+          <span id="sup-phone-error" class="form-error"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Login</label>
+          <input type="text" id="sup-email" class="form-control" placeholder="login">
+        </div>
+        <div class="form-group">
+          <label class="form-label">STIR</label>
+          <input type="text" id="sup-taxId" class="form-control" placeholder="Soliq to'lovchi raqami">
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Manzil</label>
+          <input type="text" id="sup-address" class="form-control" placeholder="Shahar, ko'cha, uy">
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Izoh</label>
+          <textarea id="sup-description" class="form-control" rows="2" placeholder="Qo'shimcha ma'lumot..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Bekor qilish</button>
+      <button class="btn btn-primary" id="save-btn" onclick="saveSupplier()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/utils.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script>
+  if (!Layout.init()) throw new Error('Auth failed');
+  Layout.setBreadcrumb([{label: 'Ma\'lumotlar'}, {label: 'Yetkazib beruvchilar'}]);
+
+  let currentPage = 1, editingId = null;
+
+  // Telefon inputni sozlash
+  Utils.setupPhoneInput('sup-phone');
+
+  document.getElementById('search-input').addEventListener('input', Utils.debounce(() => { currentPage = 1; loadData(); }, 400));
+
+  async function loadData() {
+    const tbody = document.getElementById('suppliers-table');
+    tbody.innerHTML = Utils.getSkeletonRows(9, 5);
+    try {
+      const params = { page: currentPage, limit: 15 };
+      const s = document.getElementById('search-input').value.trim();
+      if (s) params.search = s;
+      const data = await api.get('/suppliers', params);
+      renderTable(data.data);
+      const p = data.pagination;
+      document.getElementById('total-count').textContent = `Jami: ${p.total} ta`;
+      const pEl = document.getElementById('pagination');
+      pEl.innerHTML = Utils.generatePaginationHTML(p);
+      Utils.setupPagination(pEl, pg => { currentPage = pg; loadData(); });
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  function renderTable(suppliers) {
+    const tbody = document.getElementById('suppliers-table');
+    if (!suppliers.length) {
+      tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-state-title">Yetkazib beruvchi topilmadi</div></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = suppliers.map(s => `<tr>
+      <td><span style="font-weight:600">${Utils.escapeHtml(s.companyName)}</span></td>
+      <td>${Utils.escapeHtml(s.contactPerson)}</td>
+      <td>${Utils.escapeHtml(s.phone)}</td>
+      <td>${Utils.escapeHtml(s.email || '-')}</td>
+      <td>${Utils.escapeHtml(s.taxId || '-')}</td>
+      <td class="text-muted">${Utils.truncate(s.address || '-', 25)}</td>
+      <td>${s._count?.stockIns || 0} ta</td>
+      <td><span class="badge ${s.isActive ? 'badge-success' : 'badge-secondary'}">${s.isActive ? 'Faol' : 'Faol emas'}</span></td>
+      <td><div class="table-actions">
+        <button class="btn btn-secondary btn-sm btn-icon" onclick="editSupplier('${s.id}')" title="Tahrirlash">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        </button>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="deleteSupplier('${s.id}', '${Utils.escapeHtml(s.companyName)}')" title="O'chirish">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        </button>
+      </div></td>
+    </tr>`).join('');
+  }
+
+  function openModal(id = null) {
+    editingId = id;
+    document.getElementById('modal-title').textContent = id ? 'Yetkazib beruvchini tahrirlash' : 'Yangi yetkazib beruvchi';
+    ['sup-companyName','sup-contactPerson','sup-phone','sup-email','sup-taxId','sup-address','sup-description'].forEach(i => {
+      const el = document.getElementById(i); if (el) el.value = '';
+    });
+    ['sup-companyName','sup-contactPerson','sup-phone'].forEach(i => {
+      const el = document.getElementById(i + '-error'); if (el) el.textContent = '';
+    });
+    document.getElementById('supplier-modal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('supplier-modal').classList.remove('active');
+    editingId = null;
+  }
+
+  async function editSupplier(id) {
+    try {
+      const data = await api.get(`/suppliers/${id}`);
+      const s = data.data;
+      openModal(id);
+      document.getElementById('sup-companyName').value = s.companyName;
+      document.getElementById('sup-contactPerson').value = s.contactPerson;
+      document.getElementById('sup-phone').value = s.phone;
+      document.getElementById('sup-email').value = s.email || '';
+      document.getElementById('sup-taxId').value = s.taxId || '';
+      document.getElementById('sup-address').value = s.address || '';
+      document.getElementById('sup-description').value = s.description || '';
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  async function saveSupplier() {
+    const required = ['sup-companyName','sup-contactPerson','sup-phone'];
+    let valid = true;
+    required.forEach(id => {
+      const el = document.getElementById(id);
+      const err = document.getElementById(id + '-error');
+      if (err) err.textContent = '';
+      if (!el?.value?.trim()) { if (err) err.textContent = 'Bu maydon talab qilinadi'; valid = false; }
+    });
+    if (!valid) return;
+
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true; btn.textContent = 'Saqlanmoqda...';
+
+    const body = {
+      companyName: document.getElementById('sup-companyName').value.trim(),
+      contactPerson: document.getElementById('sup-contactPerson').value.trim(),
+      phone: document.getElementById('sup-phone').value.trim(),
+      email: document.getElementById('sup-email').value.trim() || undefined,
+      taxId: document.getElementById('sup-taxId').value.trim() || undefined,
+      address: document.getElementById('sup-address').value.trim() || undefined,
+      description: document.getElementById('sup-description').value.trim() || undefined
+    };
+
+    try {
+      if (editingId) { await api.put(`/suppliers/${editingId}`, body); Toast.success('Yetkazib beruvchi yangilandi'); }
+      else { await api.post('/suppliers', body); Toast.success('Yetkazib beruvchi qo\'shildi'); }
+      closeModal(); loadData();
+    } catch(e) { Toast.error(e.message); }
+    finally { btn.disabled = false; btn.textContent = 'Saqlash'; }
+  }
+
+  async function deleteSupplier(id, name) {
+    Confirm.show(`"${name}" ni o'chirishni tasdiqlaysizmi?`, 'O\'chirishni tasdiqlash', async () => {
+      try { await api.delete(`/suppliers/${id}`); Toast.success('O\'chirildi'); loadData(); }
+      catch(e) { Toast.error(e.message); }
+    });
+  }
+
+  document.getElementById('supplier-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('supplier-modal')) closeModal();
+  });
+
+  loadData();
+</script>
+</body>
+</html>

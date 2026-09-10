@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hisobotlar - OmborXona</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/global.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main-content">
+    <header class="navbar" id="navbar"></header>
+    <main class="page-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Hisobotlar</h1>
+          <p class="page-subtitle">Kirim-chiqim hisobotlari va tahlillar</p>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-secondary" onclick="printReport()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+            Chop etish
+          </button>
+          <button class="btn btn-primary" onclick="exportExcel()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Excel
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div style="display:flex;gap:4px;margin-bottom:20px;background:var(--bg-tertiary);padding:4px;border-radius:var(--radius-lg);width:fit-content">
+        <button class="btn btn-primary btn-sm" id="tab-stock" onclick="switchTab('stock')">Ombor holati</button>
+        <button class="btn btn-secondary btn-sm" id="tab-movements" onclick="switchTab('movements')">Harakatlar</button>
+        <button class="btn btn-secondary btn-sm" id="tab-period" onclick="switchTab('period')">Davriy hisobot</button>
+      </div>
+
+      <!-- Stock Summary Tab -->
+      <div id="tab-content-stock">
+        <!-- Charts Row -->
+        <div class="grid grid-3" style="gap:20px;margin-bottom:20px">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Kategoriya bo'yicha taqsimot</span>
+            </div>
+            <div class="card-body">
+              <div class="chart-wrapper" style="height:240px">
+                <canvas id="category-chart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Qiymat bo'yicha top mahsulotlar</span>
+            </div>
+            <div class="card-body">
+              <div class="chart-wrapper" style="height:240px">
+                <canvas id="value-chart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Ombor holati</span>
+            </div>
+            <div class="card-body">
+              <div class="chart-wrapper" style="height:240px">
+                <canvas id="status-chart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Batafsil ma'lumot</span>
+          </div>
+          <div class="table-container">
+            <table class="table" id="stock-report-table">
+              <thead><tr><th>Kod</th><th>Mahsulot</th><th>Kategoriya</th><th>Qoldiq</th><th>O'lchov</th><th>Sotib olish narxi</th><th>Jami qiymat</th><th>Holat</th></tr></thead>
+              <tbody id="stock-report-body"></tbody>
+            </table>
+          </div>
+          <div class="card-footer">
+            <div id="stock-totals" style="font-size:14px;font-weight:600;color:var(--text-primary)"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Movements Tab -->
+      <div id="tab-content-movements" style="display:none">
+        <!-- Charts -->
+        <div class="grid grid-2" style="gap:20px;margin-bottom:20px">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Kunlik kirim-chiqim</span>
+            </div>
+            <div class="card-body">
+              <div class="chart-wrapper" style="height:260px">
+                <canvas id="movements-line-chart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Kirim vs Chiqim</span>
+            </div>
+            <div class="card-body">
+              <div class="chart-wrapper" style="height:260px">
+                <canvas id="movements-bar-chart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter and Table -->
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-header">
+            <div class="toolbar" style="margin:0;flex:1">
+              <div class="toolbar-left">
+                <input type="date" id="mov-start" class="form-control" style="width:150px">
+                <input type="date" id="mov-end" class="form-control" style="width:150px">
+                <button class="btn btn-primary btn-sm" onclick="loadMovements()">Qidirish</button>
+              </div>
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="table">
+              <thead><tr><th>Sana</th><th>Mahsulot</th><th>Kategoriya</th><th>Tur</th><th>Miqdor</th><th>Qoldi</th></tr></thead>
+              <tbody id="movements-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Period Tab -->
+      <div id="tab-content-period" style="display:none">
+        <div class="grid grid-2" style="gap:20px;margin-bottom:20px">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Davriy kirim-chiqim</span></div>
+            <div class="card-body">
+              <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+                <button class="btn btn-secondary btn-sm" onclick="loadPeriod('day')">Bugun</button>
+                <button class="btn btn-secondary btn-sm" onclick="loadPeriod('week')">Hafta</button>
+                <button class="btn btn-secondary btn-sm" onclick="loadPeriod('month')">Oy</button>
+                <button class="btn btn-secondary btn-sm" onclick="loadPeriod('year')">Yil</button>
+              </div>
+              <div id="period-stats" style="display:flex;flex-direction:column;gap:12px"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Grafik</span></div>
+            <div class="card-body">
+              <div class="chart-wrapper">
+                <canvas id="period-chart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/utils.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script>
+  if (!Layout.init()) throw new Error('Auth failed');
+  Layout.setBreadcrumb([{label: 'Tahlil'}, {label: 'Hisobotlar'}]);
+
+  const today = new Date();
+  document.getElementById('mov-start').value = Utils.formatDateInput(new Date(today.getFullYear(), today.getMonth(), 1));
+  document.getElementById('mov-end').value = Utils.formatDateInput(today);
+
+  function switchTab(tab) {
+    currentTab = tab; // Joriy tabni saqlash
+    ['stock','movements','period'].forEach(t => {
+      document.getElementById(`tab-content-${t}`).style.display = t === tab ? 'block' : 'none';
+      const btn = document.getElementById(`tab-${t}`);
+      btn.className = t === tab ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm';
+    });
+    if (tab === 'stock') loadStockReport();
+    if (tab === 'movements') loadMovements();
+    if (tab === 'period') loadPeriod('month');
+  }
+
+  let categoryChart, valueChart, statusChart, movLineChart, movBarChart;
+  
+  async function loadStockReport() {
+    const tbody = document.getElementById('stock-report-body');
+    tbody.innerHTML = Utils.getSkeletonRows(8, 6);
+    try {
+      const data = await api.get('/reports/stock-summary');
+      const products = data.data;
+      currentReportData = products; // Excel uchun saqlash
+      let totalValue = 0;
+      let lowCount = 0;
+      
+      // Kategoriya bo'yicha guruplash
+      const categoryGroups = {};
+      const productValues = [];
+      
+      tbody.innerHTML = products.map(p => {
+        const current = parseFloat(p.currentStock);
+        const min = parseFloat(p.minStock);
+        const val = current * parseFloat(p.purchasePrice);
+        totalValue += val;
+        const isLow = current <= min;
+        if (isLow) lowCount++;
+        
+        // Kategoriya statistikasi
+        const catName = p.category?.name || 'Boshqa';
+        if (!categoryGroups[catName]) categoryGroups[catName] = 0;
+        categoryGroups[catName] += val;
+        
+        // Mahsulot qiymati
+        productValues.push({ name: p.name, value: val });
+        
+        return `<tr>
+          <td><span class="badge badge-secondary">${Utils.escapeHtml(p.code)}</span></td>
+          <td>${Utils.escapeHtml(p.name)}</td>
+          <td>${Utils.escapeHtml(p.category?.name || '-')}</td>
+          <td style="font-weight:700;color:${isLow ? 'var(--danger)' : 'var(--success)'}">${Utils.formatNumber(current, 2)}</td>
+          <td>${Utils.escapeHtml(p.unit?.symbol || '-')}</td>
+          <td>${Utils.formatCurrency(p.purchasePrice)}</td>
+          <td style="font-weight:600">${Utils.formatCurrency(val)}</td>
+          <td><span class="badge ${isLow ? 'badge-danger' : 'badge-success'}">${isLow ? 'Kam' : 'Yetarli'}</span></td>
+        </tr>`;
+      }).join('');
+      
+      document.getElementById('stock-totals').innerHTML = `
+        Ombor umumiy qiymati: <span style="color:var(--primary)">${Utils.formatCurrency(totalValue)}</span> &nbsp;|&nbsp;
+        Jami ${products.length} ta mahsulot &nbsp;|&nbsp;
+        Kam qolgan: <span style="color:var(--danger)">${lowCount} ta</span>
+      `;
+      
+      // Diagrammalarni chizish
+      drawCategoryChart(categoryGroups);
+      drawValueChart(productValues);
+      drawStatusChart(products.length - lowCount, lowCount);
+      
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  function drawCategoryChart(categoryGroups) {
+    const isDark = ThemeManager.getCurrent() === 'dark';
+    const tc = isDark ? '#9ca3af' : '#6b7280';
+    
+    if (categoryChart) categoryChart.destroy();
+    
+    const labels = Object.keys(categoryGroups);
+    const values = Object.values(categoryGroups);
+    const colors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+    
+    categoryChart = new Chart(document.getElementById('category-chart').getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: values,
+          backgroundColor: colors.slice(0, labels.length),
+          borderWidth: 2,
+          borderColor: isDark ? '#1f2937' : '#fff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { 
+            display: true, 
+            position: 'bottom',
+            labels: { color: tc, padding: 10, font: { size: 11 } }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.label + ': ' + Utils.formatCurrency(context.parsed);
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  function drawValueChart(productValues) {
+    const isDark = ThemeManager.getCurrent() === 'dark';
+    const tc = isDark ? '#9ca3af' : '#6b7280';
+    
+    if (valueChart) valueChart.destroy();
+    
+    // Top 10 mahsulotlar
+    const top10 = productValues.sort((a, b) => b.value - a.value).slice(0, 10);
+    
+    valueChart = new Chart(document.getElementById('value-chart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: top10.map(p => p.name.length > 15 ? p.name.substring(0, 15) + '...' : p.name),
+        datasets: [{
+          data: top10.map(p => p.value),
+          backgroundColor: '#2563eb',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return Utils.formatCurrency(context.parsed.x);
+              }
+            }
+          }
+        },
+        scales: {
+          x: { 
+            ticks: { color: tc, callback: function(value) { return Utils.formatNumber(value / 1000) + 'K'; } },
+            grid: { color: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }
+          },
+          y: { 
+            ticks: { color: tc, font: { size: 10 } },
+            grid: { display: false }
+          }
+        }
+      }
+    });
+  }
+
+  function drawStatusChart(normalCount, lowCount) {
+    const isDark = ThemeManager.getCurrent() === 'dark';
+    const tc = isDark ? '#9ca3af' : '#6b7280';
+    
+    if (statusChart) statusChart.destroy();
+    
+    statusChart = new Chart(document.getElementById('status-chart').getContext('2d'), {
+      type: 'pie',
+      data: {
+        labels: ['Yetarli', 'Kam qolgan'],
+        datasets: [{
+          data: [normalCount, lowCount],
+          backgroundColor: ['#10b981', '#ef4444'],
+          borderWidth: 2,
+          borderColor: isDark ? '#1f2937' : '#fff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { 
+            display: true, 
+            position: 'bottom',
+            labels: { color: tc, padding: 10 }
+          }
+        }
+      }
+    });
+  }
+
+  async function loadMovements() {
+    const tbody = document.getElementById('movements-body');
+    tbody.innerHTML = Utils.getSkeletonRows(6, 6);
+    try {
+      const params = {};
+      const s = document.getElementById('mov-start').value;
+      const e = document.getElementById('mov-end').value;
+      if (s) params.startDate = s;
+      if (e) params.endDate = e;
+      const data = await api.get('/reports/stock-movements', params);
+      const logs = data.data;
+      
+      if (!logs.length) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-title">Ma'lumot topilmadi</div></div></td></tr>`;
+        return;
+      }
+      
+      // Kunlik guruplash
+      const dailyData = {};
+      let totalIn = 0, totalOut = 0;
+      
+      logs.forEach(l => {
+        const date = l.createdAt.split('T')[0];
+        if (!dailyData[date]) dailyData[date] = { in: 0, out: 0 };
+        
+        if (l.actionType.includes('KIRIM')) {
+          dailyData[date].in += Math.abs(l.quantityChange);
+          totalIn += Math.abs(l.quantityChange);
+        } else {
+          dailyData[date].out += Math.abs(l.quantityChange);
+          totalOut += Math.abs(l.quantityChange);
+        }
+      });
+      
+      tbody.innerHTML = logs.map(l => `<tr>
+        <td>${Utils.formatDate(l.createdAt, 'DD.MM.YYYY HH:mm')}</td>
+        <td>${Utils.escapeHtml(l.product?.name || '-')}</td>
+        <td>${Utils.escapeHtml(l.product?.category?.name || '-')}</td>
+        <td><span class="badge ${l.actionType.includes('KIRIM') ? 'badge-success' : 'badge-danger'}">${Utils.escapeHtml(l.actionType)}</span></td>
+        <td style="font-weight:600;color:${l.quantityChange > 0 ? 'var(--success)' : 'var(--danger)'}">
+          ${l.quantityChange > 0 ? '+' : ''}${Utils.formatNumber(l.quantityChange, 2)} ${Utils.escapeHtml(l.product?.unit?.symbol || '')}
+        </td>
+        <td>${Utils.formatNumber(l.quantityAfter, 2)} ${Utils.escapeHtml(l.product?.unit?.symbol || '')}</td>
+      </tr>`).join('');
+      
+      // Diagrammalarni chizish
+      drawMovementsLineChart(dailyData);
+      drawMovementsBarChart(totalIn, totalOut);
+      
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  function drawMovementsLineChart(dailyData) {
+    const isDark = ThemeManager.getCurrent() === 'dark';
+    const tc = isDark ? '#9ca3af' : '#6b7280';
+    
+    if (movLineChart) movLineChart.destroy();
+    
+    const dates = Object.keys(dailyData).sort();
+    const inData = dates.map(d => dailyData[d].in);
+    const outData = dates.map(d => dailyData[d].out);
+    
+    movLineChart = new Chart(document.getElementById('movements-line-chart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: dates.map(d => {
+          const dt = new Date(d);
+          return dt.getDate() + '.' + (dt.getMonth() + 1);
+        }),
+        datasets: [
+          {
+            label: 'Kirim',
+            data: inData,
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            tension: 0.4,
+            fill: true
+          },
+          {
+            label: 'Chiqim',
+            data: outData,
+            borderColor: '#ef4444',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            tension: 0.4,
+            fill: true
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { 
+            display: true,
+            labels: { color: tc, padding: 10 }
+          }
+        },
+        scales: {
+          y: { 
+            ticks: { color: tc },
+            grid: { color: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }
+          },
+          x: { 
+            ticks: { color: tc },
+            grid: { display: false }
+          }
+        }
+      }
+    });
+  }
+
+  function drawMovementsBarChart(totalIn, totalOut) {
+    const isDark = ThemeManager.getCurrent() === 'dark';
+    const tc = isDark ? '#9ca3af' : '#6b7280';
+    
+    if (movBarChart) movBarChart.destroy();
+    
+    movBarChart = new Chart(document.getElementById('movements-bar-chart').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: ['Kirim', 'Chiqim'],
+        datasets: [{
+          label: 'Miqdor',
+          data: [totalIn, totalOut],
+          backgroundColor: ['#10b981', '#ef4444'],
+          borderRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: { 
+            ticks: { color: tc },
+            grid: { color: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }
+          },
+          x: { 
+            ticks: { color: tc },
+            grid: { display: false }
+          }
+        }
+      }
+    });
+  }
+
+  let periodChart;
+  async function loadPeriod(type) {
+    const now = new Date();
+    let startDate;
+    if (type === 'day') startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    else if (type === 'week') startDate = new Date(now - 7 * 24 * 60 * 60 * 1000);
+    else if (type === 'month') startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    else startDate = new Date(now.getFullYear(), 0, 1);
+
+    try {
+      const params = { startDate: startDate.toISOString(), endDate: now.toISOString() };
+      const [ins, outs] = await Promise.all([
+        api.get('/stock-in', { ...params, limit: 1000 }),
+        api.get('/stock-out', { ...params, limit: 1000 })
+      ]);
+
+      const totalIn = ins.data.reduce((s, i) => s + parseFloat(i.totalAmount), 0);
+      const totalOut = outs.data.reduce((s, i) => s + (parseFloat(i.quantity) * parseFloat(i.product?.salePrice || 0)), 0);
+
+      document.getElementById('period-stats').innerHTML = `
+        <div style="display:flex;justify-content:space-between;padding:14px;background:var(--success-light);border-radius:var(--radius)">
+          <span style="font-size:14px;color:var(--success);font-weight:500">Kirim operatsiyalari</span>
+          <span style="font-size:16px;font-weight:700;color:var(--success)">${ins.pagination.total} ta</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:14px;background:var(--success-light);border-radius:var(--radius)">
+          <span style="font-size:14px;color:var(--success);font-weight:500">Kirim jami qiymati</span>
+          <span style="font-size:16px;font-weight:700;color:var(--success)">${Utils.formatCurrency(totalIn)}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:14px;background:var(--warning-light);border-radius:var(--radius)">
+          <span style="font-size:14px;color:var(--warning);font-weight:500">Chiqim operatsiyalari</span>
+          <span style="font-size:16px;font-weight:700;color:var(--warning)">${outs.pagination.total} ta</span>
+        </div>
+      `;
+
+      const isDark = ThemeManager.getCurrent() === 'dark';
+      const tc = isDark ? '#9ca3af' : '#6b7280';
+      if (periodChart) periodChart.destroy();
+      periodChart = new Chart(document.getElementById('period-chart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: ['Kirim', 'Chiqim'],
+          datasets: [{ data: [ins.pagination.total, outs.pagination.total], backgroundColor: ['#2563eb', '#d97706'], borderRadius: 6 }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { ticks: { color: tc }, grid: { color: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' } }, x: { ticks: { color: tc }, grid: { display: false } } }
+        }
+      });
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  function printReport() {
+    window.print();
+  }
+
+  let currentReportData = [];
+  let currentTab = 'stock';
+
+  function exportExcel() {
+    if (currentTab === 'stock') {
+      exportStockToExcel();
+    } else if (currentTab === 'movements') {
+      exportMovementsToExcel();
+    } else if (currentTab === 'period') {
+      exportPeriodToExcel();
+    }
+  }
+
+  function exportStockToExcel() {
+    if (!currentReportData || currentReportData.length === 0) {
+      Toast.warning('Eksport qilish uchun ma\'lumot yo\'q');
+      return;
+    }
+
+    const ws_data = [
+      ['OMBOR HOLATI HISOBOTI'],
+      ['Sana:', Utils.formatDate(new Date(), 'DD.MM.YYYY HH:mm')],
+      [],
+      ['Kod', 'Mahsulot', 'Kategoriya', 'Qoldiq', 'O\'lchov', 'Sotib olish narxi', 'Jami qiymat', 'Holat']
+    ];
+
+    let totalValue = 0;
+    currentReportData.forEach(p => {
+      const current = parseFloat(p.currentStock);
+      const min = parseFloat(p.minStock);
+      const val = current * parseFloat(p.purchasePrice);
+      totalValue += val;
+      const isLow = current <= min;
+
+      ws_data.push([
+        p.code,
+        p.name,
+        p.category?.name || '-',
+        current,
+        p.unit?.symbol || '-',
+        parseFloat(p.purchasePrice),
+        val,
+        isLow ? 'Kam' : 'Yetarli'
+      ]);
+    });
+
+    ws_data.push([]);
+    ws_data.push(['', '', '', '', '', 'JAMI:', totalValue]);
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+    // Ustun kengliklari
+    ws['!cols'] = [
+      { wch: 10 }, { wch: 30 }, { wch: 15 }, { wch: 10 }, 
+      { wch: 10 }, { wch: 15 }, { wch: 15 }, { wch: 10 }
+    ];
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Ombor holati');
+    XLSX.writeFile(wb, `Ombor_holati_${Utils.formatDate(new Date(), 'DD.MM.YYYY')}.xlsx`);
+    Toast.success('Excel fayli yuklab olindi');
+  }
+
+  function exportMovementsToExcel() {
+    const tbody = document.getElementById('movements-body');
+    const rows = tbody.querySelectorAll('tr');
+    
+    if (rows.length === 0 || rows[0].querySelector('.empty-state')) {
+      Toast.warning('Eksport qilish uchun ma\'lumot yo\'q');
+      return;
+    }
+
+    const startDate = document.getElementById('mov-start').value;
+    const endDate = document.getElementById('mov-end').value;
+
+    const ws_data = [
+      ['HARAKATLAR HISOBOTI'],
+      ['Boshlanish:', startDate || '-'],
+      ['Tugash:', endDate || '-'],
+      [],
+      ['Sana', 'Mahsulot', 'Kategoriya', 'Tur', 'Miqdor', 'Qoldiq']
+    ];
+
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length > 0) {
+        ws_data.push([
+          cells[0]?.textContent.trim() || '',
+          cells[1]?.textContent.trim() || '',
+          cells[2]?.textContent.trim() || '',
+          cells[3]?.textContent.trim() || '',
+          cells[4]?.textContent.trim() || '',
+          cells[5]?.textContent.trim() || ''
+        ]);
+      }
+    });
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+    ws['!cols'] = [
+      { wch: 18 }, { wch: 30 }, { wch: 15 }, 
+      { wch: 12 }, { wch: 15 }, { wch: 15 }
+    ];
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Harakatlar');
+    XLSX.writeFile(wb, `Harakatlar_${Utils.formatDate(new Date(), 'DD.MM.YYYY')}.xlsx`);
+    Toast.success('Excel fayli yuklab olindi');
+  }
+
+  function exportPeriodToExcel() {
+    Toast.info('Davriy hisobot eksporti amalga oshirilmoqda...');
+    // Bu funksiya kelajakda kengaytirilishi mumkin
+  }
+
+  loadStockReport();
+</script>
+</body>
+</html>

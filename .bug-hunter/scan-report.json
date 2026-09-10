@@ -1,0 +1,177 @@
+{
+  "project": "Omborxona Boshqaruv Tizimi",
+  "generatedAt": "2026-09-08T15:43:30.000Z",
+  "mode": "scan-only",
+  "stats": {
+    "totalDiscovered": 16,
+    "confirmed": 16,
+    "dismissed": 0,
+    "critical": 1,
+    "high": 4,
+    "medium": 7,
+    "low": 4
+  },
+  "summary": "Professional security and code audit performed according to Bug Hunter adversarial protocol. Discovered 1 Critical privilege escalation vulnerability, 4 High severity vulnerabilities (Plaintext credentials in logs, Operator UI lockout, Concurrency stock overdraw, and Negative inventory bug), 7 Medium severity issues, and 4 Low severity flaws.",
+  "findings": [
+    {
+      "id": "BH-001",
+      "verdict": "CONFIRMED",
+      "severity": "CRITICAL",
+      "title": "Unauthenticated Privilege Escalation via Role Assignment in Register",
+      "file": "backend/src/controllers/auth.controller.js",
+      "lines": "7-64",
+      "cwe": "CWE-269",
+      "impact": "Unauthenticated users can grant themselves Admin privileges"
+    },
+    {
+      "id": "BH-002",
+      "verdict": "CONFIRMED",
+      "severity": "HIGH",
+      "title": "Plaintext Passwords Logged in Audit Trail Table",
+      "file": "backend/src/middleware/auditLog.js",
+      "lines": "15-21",
+      "cwe": "CWE-532",
+      "impact": "User passwords visible in plaintext to anyone with audit access"
+    },
+    {
+      "id": "BH-003",
+      "verdict": "CONFIRMED",
+      "severity": "HIGH",
+      "title": "Operator Role Locked Out of Core Warehouse Menus in Sidebar Navigation",
+      "file": "frontend/assets/js/layout.js",
+      "lines": "52-103",
+      "cwe": "CWE-284",
+      "impact": "Operators cannot see or access StockIn, StockOut, Inventory, or Suppliers in UI"
+    },
+    {
+      "id": "BH-004",
+      "verdict": "CONFIRMED",
+      "severity": "HIGH",
+      "title": "Stock Overdraw Race Condition in StockOut Transactions",
+      "file": "backend/src/controllers/stockOut.controller.js",
+      "lines": "118-167",
+      "cwe": "CWE-362",
+      "impact": "Concurrent requests cause inventory desynchronization and overselling"
+    },
+    {
+      "id": "BH-005",
+      "verdict": "CONFIRMED",
+      "severity": "HIGH",
+      "title": "Negative Inventory Stock Permitted on StockIn Quantity Updates",
+      "file": "backend/src/controllers/stockIn.controller.js",
+      "lines": "271-280",
+      "cwe": "CWE-840",
+      "impact": "Stock records can drop below zero without validation error"
+    },
+    {
+      "id": "BH-006",
+      "verdict": "CONFIRMED",
+      "severity": "MEDIUM",
+      "title": "Unhandled PrismaClientValidationError and Database Schema Disclosure via sortBy",
+      "file": "backend/src/controllers/product.controller.js",
+      "lines": "10-40",
+      "cwe": "CWE-209",
+      "impact": "Internal database structure leaked in 500 error responses"
+    },
+    {
+      "id": "BH-007",
+      "verdict": "CONFIRMED",
+      "severity": "MEDIUM",
+      "title": "JavaScript Syntax Error in Table Action Buttons for Uzbek Names with Apostrophes",
+      "file": "backend/src/views/pages/products.ejs",
+      "lines": "250",
+      "cwe": "CWE-79",
+      "impact": "Delete button breaks with JavaScript crash on items with apostrophes (e.g. Bo'yoq)"
+    },
+    {
+      "id": "BH-008",
+      "verdict": "CONFIRMED",
+      "severity": "MEDIUM",
+      "title": "Hardcoded http://localhost:3010/api Host Breaks Remote/LAN/Production Use",
+      "file": "frontend/assets/js/api.js",
+      "lines": "1",
+      "cwe": "CWE-1188",
+      "impact": "Clients connecting via IP or domain cannot reach backend API"
+    },
+    {
+      "id": "BH-009",
+      "verdict": "CONFIRMED",
+      "severity": "MEDIUM",
+      "title": "Foreign Key 500 Crash on Deleting Products and Suppliers with Transaction History",
+      "file": "backend/src/controllers/product.controller.js",
+      "lines": "187-202",
+      "cwe": "CWE-20",
+      "impact": "Unhandled P2003 error when trying to delete items with stock records"
+    },
+    {
+      "id": "BH-010",
+      "verdict": "CONFIRMED",
+      "severity": "LOW",
+      "title": "Insecure Direct Object Reference (IDOR) on Notifications",
+      "file": "backend/src/routes/notification.routes.js",
+      "lines": "26-39",
+      "cwe": "CWE-639",
+      "impact": "Any user can mark other users' notifications as read"
+    },
+    {
+      "id": "BH-011",
+      "verdict": "CONFIRMED",
+      "severity": "LOW",
+      "title": "Mark All Read in Notification Panel is a Mock UI Without Backend API",
+      "file": "frontend/assets/js/layout.js",
+      "lines": "299-302",
+      "cwe": "CWE-404",
+      "impact": "Notifications are not actually cleared in database"
+    },
+    {
+      "id": "BH-012",
+      "verdict": "CONFIRMED",
+      "severity": "MEDIUM",
+      "title": "Low-Stock Warning Alerts Routed Only to Acting User Instead of Admins",
+      "file": "backend/src/controllers/stockIn.controller.js",
+      "lines": "190-198",
+      "cwe": "CWE-840",
+      "impact": "Warehouse administrators miss urgent low-stock warnings"
+    },
+    {
+      "id": "BH-013",
+      "verdict": "CONFIRMED",
+      "severity": "MEDIUM",
+      "title": "Missing Validation on Product Update Allows Negative Prices and NaN Crash",
+      "file": "backend/src/routes/product.routes.js",
+      "lines": "31-34",
+      "cwe": "CWE-20",
+      "impact": "Invalid price inputs cause 500 crash or negative values in database"
+    },
+    {
+      "id": "BH-014",
+      "verdict": "CONFIRMED",
+      "severity": "LOW",
+      "title": "Unused MemoryStore Session Middleware Leaking Memory",
+      "file": "backend/src/server.js",
+      "lines": "60-69",
+      "cwe": "CWE-400",
+      "impact": "Memory leak and unnecessary session overhead"
+    },
+    {
+      "id": "BH-015",
+      "verdict": "CONFIRMED",
+      "severity": "MEDIUM",
+      "title": "Password Reset via Admin Does Not Invalidate Active User Sessions",
+      "file": "backend/src/controllers/user.controller.js",
+      "lines": "315-348",
+      "cwe": "CWE-613",
+      "impact": "Compromised account tokens remain valid after password change"
+    },
+    {
+      "id": "BH-016",
+      "verdict": "CONFIRMED",
+      "severity": "LOW",
+      "title": "End Date Filter Truncates Full Day Records in Reports",
+      "file": "backend/src/routes/report.routes.js",
+      "lines": "33-37",
+      "cwe": "CWE-840",
+      "impact": "Transactions made during the selected end date are omitted"
+    }
+  ]
+}

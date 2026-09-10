@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harakatlar Tarixi - OmborXona</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/global.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main-content">
+    <header class="navbar" id="navbar"></header>
+    <main class="page-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Harakatlar Tarixi</h1>
+          <p class="page-subtitle">Tizimda bajarilgan barcha amallar ro'yxati</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="toolbar" style="margin:0;flex:1">
+            <div class="toolbar-left">
+              <select id="module-filter" class="form-control" style="width:180px">
+                <option value="">Barcha modullar</option>
+                <option value="products">Mahsulotlar</option>
+                <option value="categories">Kategoriyalar</option>
+                <option value="suppliers">Yetkazib beruvchilar</option>
+                <option value="stock">Ombor</option>
+                <option value="users">Foydalanuvchilar</option>
+                <option value="settings">Sozlamalar</option>
+              </select>
+              <input type="date" id="start-date" class="form-control" style="width:150px">
+              <input type="date" id="end-date" class="form-control" style="width:150px">
+            </div>
+            <span id="total-count" class="text-sm text-muted"></span>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Foydalanuvchi</th>
+                <th>Modul</th>
+                <th>Amal</th>
+                <th>IP manzil</th>
+                <th>Brauzer</th>
+                <th>Sana va vaqt</th>
+              </tr>
+            </thead>
+            <tbody id="audit-table"></tbody>
+          </table>
+        </div>
+        <div class="card-footer" style="display:flex;align-items:center;justify-content:space-between">
+          <span id="page-info" class="text-sm text-muted"></span>
+          <div id="pagination"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/utils.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script>
+  if (!Layout.init()) throw new Error('Auth failed');
+  Layout.setBreadcrumb([{label: 'Tahlil'}, {label: 'Harakatlar tarixi'}]);
+
+  const user = Auth.getUser();
+  const isAdmin = user?.role?.name === 'Admin';
+
+  // Admin bo'lmasa filterlarni yashirish
+  if (!isAdmin) {
+    document.querySelector('.toolbar').style.display = 'none';
+  }
+
+  let currentPage = 1;
+
+  document.getElementById('module-filter').addEventListener('change', () => { currentPage = 1; loadData(); });
+  document.getElementById('start-date').addEventListener('change', () => { currentPage = 1; loadData(); });
+  document.getElementById('end-date').addEventListener('change', () => { currentPage = 1; loadData(); });
+
+  async function loadData() {
+    const tbody = document.getElementById('audit-table');
+    tbody.innerHTML = Utils.getSkeletonRows(6, 5);
+    try {
+      const params = { page: currentPage, limit: 50 };
+      const m = document.getElementById('module-filter').value;
+      if (m) params.module = m;
+      const data = await api.get('/audit-logs', params);
+      renderTable(data.data);
+      const p = data.pagination;
+      document.getElementById('total-count').textContent = `Jami: ${p.total} ta`;
+      document.getElementById('page-info').textContent = `${((p.page-1)*p.limit)+1}-${Math.min(p.page*p.limit, p.total)} / ${p.total}`;
+      const pEl = document.getElementById('pagination');
+      pEl.innerHTML = Utils.generatePaginationHTML(p);
+      Utils.setupPagination(pEl, pg => { currentPage = pg; loadData(); });
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  const moduleColors = {
+    products: 'badge-info', categories: 'badge-secondary', suppliers: 'badge-warning',
+    stock: 'badge-success', users: 'badge-info', settings: 'badge-secondary'
+  };
+
+  function renderTable(logs) {
+    const tbody = document.getElementById('audit-table');
+    if (!logs.length) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-title">Hech qanday harakat topilmadi</div></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = logs.map(l => {
+      const ua = l.userAgent ? l.userAgent.split(' ')[0] : '-';
+      return `<tr>
+        <td><span style="font-weight:500">${Utils.escapeHtml(l.user?.fullName || '-')}</span><br><span class="text-xs text-muted">${Utils.escapeHtml(l.user?.username || '')}</span></td>
+        <td><span class="badge ${moduleColors[l.module] || 'badge-secondary'}">${Utils.escapeHtml(l.module)}</span></td>
+        <td><span class="text-sm">${Utils.escapeHtml(l.action)}</span></td>
+        <td class="text-muted text-sm">${Utils.escapeHtml(l.ipAddress || '-')}</td>
+        <td class="text-muted text-sm">${Utils.truncate(ua, 30)}</td>
+        <td class="text-sm">${Utils.formatDate(l.createdAt, 'DD.MM.YYYY HH:mm')}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  loadData();
+</script>
+</body>
+</html>

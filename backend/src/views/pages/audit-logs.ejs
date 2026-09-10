@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="dark">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+<div class="admin-layout" id="admin-layout">
+  <%- include('../partials/sidebar') %>
+  <div class="main-content">
+    <%- include('../partials/navbar') %>
+    <main class="page-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Harakatlar Tarixi</h1>
+          <p class="page-subtitle">Tizimda amalga oshirilgan barcha operatsiyalar</p>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-4" style="gap:20px;margin-bottom:24px">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:linear-gradient(135deg,#2563eb,#3b82f6)">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Jami harakatlar</div>
+            <div class="stat-value" id="total-logs">0</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:linear-gradient(135deg,#059669,#10b981)">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Kirim operatsiyalari</div>
+            <div class="stat-value" id="stock-in-count">0</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:linear-gradient(135deg,#d97706,#f59e0b)">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Chiqim operatsiyalari</div>
+            <div class="stat-value" id="stock-out-count">0</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Faol foydalanuvchilar</div>
+            <div class="stat-value" id="active-users">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div style="display:flex;gap:12px;flex:1">
+            <div class="search-bar" style="flex:1;max-width:320px">
+              <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input type="text" id="search-input" class="form-control" placeholder="Qidirish...">
+            </div>
+            <select id="module-filter" class="form-control" style="width:180px">
+              <option value="">Barcha modullar</option>
+              <option value="auth">Kirish/Chiqish</option>
+              <option value="products">Mahsulotlar</option>
+              <option value="categories">Kategoriyalar</option>
+              <option value="suppliers">Yetkazib beruvchilar</option>
+              <option value="stock_in">Kirim</option>
+              <option value="stock_out">Chiqim</option>
+              <option value="users">Foydalanuvchilar</option>
+              <option value="settings">Sozlamalar</option>
+            </select>
+            <select id="action-filter" class="form-control" style="width:150px">
+              <option value="">Barcha amallar</option>
+              <option value="create">Qo'shish</option>
+              <option value="update">Tahrirlash</option>
+              <option value="delete">O'chirish</option>
+              <option value="login">Kirish</option>
+              <option value="logout">Chiqish</option>
+            </select>
+          </div>
+          <span id="total-count" class="text-sm text-muted"></span>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width:140px">Sana/Vaqt</th>
+                <th style="width:180px">Foydalanuvchi</th>
+                <th style="width:140px">Modul</th>
+                <th style="width:120px">Amal</th>
+                <th>Tafsilot</th>
+                <th style="width:150px">IP Manzil</th>
+              </tr>
+            </thead>
+            <tbody id="logs-table"></tbody>
+          </table>
+        </div>
+        <div class="card-footer" style="display:flex;justify-content:flex-end">
+          <div id="pagination"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<%- include('../partials/scripts') %>
+
+<script>
+  if (!Layout.init()) throw new Error('Auth failed');
+  Layout.setBreadcrumb([{label: 'Tahlil'}, {label: 'Harakatlar Tarixi'}]);
+
+  const user = Auth.getUser();
+  const isAdmin = user?.role?.name === 'Admin';
+
+  let currentPage = 1;
+
+  const searchInput = document.getElementById('search-input');
+  const moduleFilter = document.getElementById('module-filter');
+  const actionFilter = document.getElementById('action-filter');
+
+  searchInput.addEventListener('input', Utils.debounce(() => { currentPage = 1; loadLogs(); }, 400));
+  moduleFilter.addEventListener('change', () => { currentPage = 1; loadLogs(); });
+  actionFilter.addEventListener('change', () => { currentPage = 1; loadLogs(); });
+
+  async function loadLogs() {
+    const tbody = document.getElementById('logs-table');
+    tbody.innerHTML = Utils.getSkeletonRows(6, 5);
+    
+    try {
+      const params = { page: currentPage, limit: 20 };
+      const s = searchInput.value.trim();
+      const m = moduleFilter.value;
+      const a = actionFilter.value;
+      
+      if (s) params.search = s;
+      if (m) params.module = m;
+      if (a) params.action = a;
+      
+      const data = await api.get('/audit-logs', params);
+      renderTable(data.data);
+      
+      const p = data.pagination;
+      document.getElementById('total-count').textContent = `Jami: ${p.total} ta`;
+      document.getElementById('total-logs').textContent = Utils.formatNumber(p.total);
+      
+      const paginationEl = document.getElementById('pagination');
+      paginationEl.innerHTML = Utils.generatePaginationHTML(p);
+      Utils.setupPagination(paginationEl, pg => { currentPage = pg; loadLogs(); });
+      
+      loadStats();
+    } catch(e) { 
+      Toast.error(e.message); 
+    }
+  }
+
+  async function loadStats() {
+    try {
+      const allLogs = await api.get('/audit-logs', { limit: 10000 });
+      const logs = allLogs.data;
+      
+      const stockInCount = logs.filter(l => l.module === 'stock_in').length;
+      const stockOutCount = logs.filter(l => l.module === 'stock_out').length;
+      const uniqueUsers = new Set(logs.map(l => l.userId)).size;
+      
+      document.getElementById('stock-in-count').textContent = Utils.formatNumber(stockInCount);
+      document.getElementById('stock-out-count').textContent = Utils.formatNumber(stockOutCount);
+      document.getElementById('active-users').textContent = Utils.formatNumber(uniqueUsers);
+    } catch(e) {}
+  }
+
+  function renderTable(logs) {
+    const tbody = document.getElementById('logs-table');
+    if (!logs.length) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-title">Hech qanday harakat topilmadi</div></div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = logs.map(log => {
+      const moduleName = getModuleName(log.module);
+      const actionName = getActionName(log.action);
+      const actionBadge = getActionBadge(log.action);
+      
+      return `<tr>
+        <td class="text-sm text-muted">${Utils.formatDate(log.createdAt, 'DD.MM.YYYY HH:mm')}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:11px">
+              ${Utils.escapeHtml(log.user?.fullName || 'N/A').charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <div style="font-weight:500;font-size:13px">${Utils.escapeHtml(log.user?.fullName || 'N/A')}</div>
+              <div class="text-muted text-sm">@${Utils.escapeHtml(log.user?.username || 'unknown')}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge badge-secondary">${moduleName}</span></td>
+        <td><span class="badge ${actionBadge}">${actionName}</span></td>
+        <td class="text-sm">${Utils.escapeHtml(log.details || '-')}</td>
+        <td class="text-muted text-sm">${log.ipAddress || '-'}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  function getModuleName(module) {
+    const names = {
+      'auth': 'Autentifikatsiya',
+      'products': 'Mahsulotlar',
+      'categories': 'Kategoriyalar',
+      'suppliers': 'Yetkazib beruvchilar',
+      'stock_in': 'Kirim',
+      'stock_out': 'Chiqim',
+      'users': 'Foydalanuvchilar',
+      'settings': 'Sozlamalar',
+      'audit': 'Audit'
+    };
+    return names[module] || module;
+  }
+
+  function getActionName(action) {
+    const names = {
+      'create': 'Qo\'shish',
+      'update': 'Tahrirlash',
+      'delete': 'O\'chirish',
+      'login': 'Kirish',
+      'logout': 'Chiqish',
+      'read': 'Ko\'rish'
+    };
+    return names[action] || action;
+  }
+
+  function getActionBadge(action) {
+    const badges = {
+      'create': 'badge-success',
+      'update': 'badge-warning',
+      'delete': 'badge-danger',
+      'login': 'badge-info',
+      'logout': 'badge-secondary',
+      'read': 'badge-primary'
+    };
+    return badges[action] || 'badge-secondary';
+  }
+
+  loadLogs();
+</script>
+</body>
+</html>

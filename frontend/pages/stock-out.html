@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chiqim - OmborXona</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/global.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main-content">
+    <header class="navbar" id="navbar"></header>
+    <main class="page-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Chiqim</h1>
+          <p class="page-subtitle">Mahsulot chiqim operatsiyalari</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Yangi chiqim
+        </button>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="toolbar" style="margin:0;flex:1">
+            <div class="toolbar-left">
+              <select id="product-filter" class="form-control" style="width:220px">
+                <option value="">Barcha mahsulotlar</option>
+              </select>
+              <input type="date" id="start-date" class="form-control" style="width:150px">
+              <input type="date" id="end-date" class="form-control" style="width:150px">
+            </div>
+            <div class="toolbar-right">
+              <span id="total-count" class="text-sm text-muted"></span>
+            </div>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Mahsulot</th>
+                <th>Miqdor</th>
+                <th>Kimga berildi</th>
+                <th>Telefon</th>
+                <th>Sana</th>
+                <th>Izoh</th>
+                <th>Kirituvchi</th>
+                <th style="width:100px">Amallar</th>
+              </tr>
+            </thead>
+            <tbody id="stockout-table"></tbody>
+          </table>
+        </div>
+        <div class="card-footer" style="display:flex;align-items:center;justify-content:space-between">
+          <span id="page-info" class="text-sm text-muted"></span>
+          <div id="pagination"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- StockOut Modal -->
+<div class="modal-overlay" id="stockout-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modal-title">Yangi chiqim</h3>
+      <button class="modal-close" onclick="closeModal()">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <form id="stockout-form" novalidate>
+        <div class="grid grid-2" style="gap:16px">
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Mahsulot <span style="color:var(--danger)">*</span></label>
+            <select id="so-productId" class="form-control">
+              <option value="">Mahsulot tanlang</option>
+            </select>
+            <span id="so-productId-error" class="form-error"></span>
+            <div id="so-stock-info" class="form-hint" style="margin-top:4px"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Miqdor <span style="color:var(--danger)">*</span></label>
+            <input type="number" id="so-quantity" class="form-control" placeholder="0" min="0.01" step="0.01">
+            <span id="so-quantity-error" class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sana</label>
+            <input type="date" id="so-date" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kimga berildi <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="so-recipientName" class="form-control" placeholder="To'liq ism" onkeypress="return Utils.allowOnlyLetters(event)">
+            <span id="so-recipientName-error" class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Telefon raqami</label>
+            <input type="text" id="so-recipientPhone" class="form-control" placeholder="+998 XX XXX XX XX">
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Izoh</label>
+            <textarea id="so-notes" class="form-control" rows="2" placeholder="Qo'shimcha izoh..."></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Bekor qilish</button>
+      <button class="btn btn-primary" id="save-btn" onclick="saveStockOut()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/utils.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script>
+  if (!Layout.init()) throw new Error('Auth failed');
+  Layout.setBreadcrumb([{label: 'Omborxona'}, {label: 'Chiqim'}]);
+
+  let currentPage = 1, editingId = null, products = [];
+
+  // Telefon inputni sozlash
+  Utils.setupPhoneInput('so-recipientPhone');
+
+  document.getElementById('product-filter').addEventListener('change', () => { currentPage = 1; loadData(); });
+  document.getElementById('start-date').addEventListener('change', () => { currentPage = 1; loadData(); });
+  document.getElementById('end-date').addEventListener('change', () => { currentPage = 1; loadData(); });
+
+  document.getElementById('so-productId').addEventListener('change', function() {
+    const product = products.find(p => p.id === this.value);
+    const info = document.getElementById('so-stock-info');
+    if (product) {
+      info.textContent = `Joriy qoldiq: ${Utils.formatNumber(product.currentStock)} ${product.unit?.symbol || ''}`;
+      info.style.color = parseFloat(product.currentStock) <= parseFloat(product.minStock) ? 'var(--danger)' : 'var(--success)';
+    } else {
+      info.textContent = '';
+    }
+  });
+
+  async function init() {
+    document.getElementById('so-date').value = Utils.formatDateInput(new Date());
+    await loadFilterProducts();
+    loadData();
+  }
+
+  async function loadFilterProducts() {
+    try {
+      const data = await api.get('/products', { limit: 500, isActive: 'true' });
+      products = data.data;
+      const opts = products.map(p => `<option value="${p.id}">${Utils.escapeHtml(p.code)} - ${Utils.escapeHtml(p.name)} [${Utils.formatNumber(p.currentStock)} ${p.unit?.symbol || ''}]</option>`).join('');
+      document.getElementById('product-filter').innerHTML = '<option value="">Barcha mahsulotlar</option>' + products.map(p => `<option value="${p.id}">${Utils.escapeHtml(p.code)} - ${Utils.escapeHtml(p.name)}</option>`).join('');
+      document.getElementById('so-productId').innerHTML = '<option value="">Mahsulot tanlang</option>' + opts;
+    } catch(e) {}
+  }
+
+  async function loadData() {
+    const tbody = document.getElementById('stockout-table');
+    tbody.innerHTML = Utils.getSkeletonRows(8, 5);
+    try {
+      const params = { page: currentPage, limit: 15 };
+      const pf = document.getElementById('product-filter').value;
+      const sd = document.getElementById('start-date').value;
+      const ed = document.getElementById('end-date').value;
+      if (pf) params.productId = pf;
+      if (sd) params.startDate = sd;
+      if (ed) params.endDate = ed;
+      const data = await api.get('/stock-out', params);
+      renderTable(data.data);
+      const p = data.pagination;
+      document.getElementById('total-count').textContent = `Jami: ${p.total} ta`;
+      document.getElementById('page-info').textContent = `${((p.page-1)*p.limit)+1}-${Math.min(p.page*p.limit, p.total)} / ${p.total}`;
+      const pEl = document.getElementById('pagination');
+      pEl.innerHTML = Utils.generatePaginationHTML(p);
+      Utils.setupPagination(pEl, pg => { currentPage = pg; loadData(); });
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  function renderTable(items) {
+    const tbody = document.getElementById('stockout-table');
+    if (!items.length) {
+      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-state-title">Chiqim topilmadi</div></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = items.map(s => `<tr>
+      <td><span style="font-weight:500">${Utils.escapeHtml(s.product?.name || '-')}</span><br><span class="text-xs text-muted">${Utils.escapeHtml(s.product?.code || '')}</span></td>
+      <td>${Utils.formatNumber(s.quantity)} ${Utils.escapeHtml(s.product?.unit?.symbol || '')}</td>
+      <td><span style="font-weight:500">${Utils.escapeHtml(s.recipientName)}</span></td>
+      <td>${Utils.escapeHtml(s.recipientPhone || '-')}</td>
+      <td>${Utils.formatDate(s.date)}</td>
+      <td class="text-muted">${Utils.truncate(s.notes || '-', 30)}</td>
+      <td>${Utils.escapeHtml(s.user?.fullName || '-')}</td>
+      <td><div class="table-actions">
+        <button class="btn btn-secondary btn-sm btn-icon" onclick="editStockOut('${s.id}')" title="Tahrirlash">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        </button>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="deleteStockOut('${s.id}')" title="O'chirish">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        </button>
+      </div></td>
+    </tr>`).join('');
+  }
+
+  function openModal(id = null) {
+    editingId = id;
+    document.getElementById('modal-title').textContent = id ? 'Chiqimni tahrirlash' : 'Yangi chiqim';
+    if (!id) {
+      ['so-productId','so-quantity','so-recipientName','so-recipientPhone','so-notes'].forEach(i => document.getElementById(i).value = '');
+      document.getElementById('so-date').value = Utils.formatDateInput(new Date());
+      document.getElementById('so-stock-info').textContent = '';
+    }
+    document.getElementById('stockout-modal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('stockout-modal').classList.remove('active');
+    editingId = null;
+  }
+
+  async function editStockOut(id) {
+    try {
+      const data = await api.get(`/stock-out/${id}`);
+      const s = data.data;
+      openModal(id);
+      document.getElementById('so-productId').value = s.productId;
+      document.getElementById('so-productId').dispatchEvent(new Event('change'));
+      document.getElementById('so-quantity').value = s.quantity;
+      document.getElementById('so-recipientName').value = s.recipientName;
+      document.getElementById('so-recipientPhone').value = s.recipientPhone || '';
+      document.getElementById('so-date').value = Utils.formatDateInput(s.date);
+      document.getElementById('so-notes').value = s.notes || '';
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  async function saveStockOut() {
+    const checks = [
+      {id:'so-productId', err:'so-productId-error'},
+      {id:'so-quantity', err:'so-quantity-error'},
+      {id:'so-recipientName', err:'so-recipientName-error'}
+    ];
+    let valid = true;
+    checks.forEach(f => {
+      const el = document.getElementById(f.id);
+      const err = document.getElementById(f.err);
+      if (err) err.textContent = '';
+      if (!el?.value?.trim()) { if (err) err.textContent = 'Bu maydon talab qilinadi'; valid = false; }
+    });
+    if (!valid) return;
+
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saqlanmoqda...';
+
+    const body = {
+      productId: document.getElementById('so-productId').value,
+      quantity: document.getElementById('so-quantity').value,
+      recipientName: document.getElementById('so-recipientName').value.trim(),
+      recipientPhone: document.getElementById('so-recipientPhone').value.trim() || undefined,
+      date: document.getElementById('so-date').value || undefined,
+      notes: document.getElementById('so-notes').value.trim() || undefined
+    };
+
+    try {
+      if (editingId) {
+        await api.put(`/stock-out/${editingId}`, body);
+        Toast.success('Chiqim yangilandi');
+      } else {
+        await api.post('/stock-out', body);
+        Toast.success('Chiqim qo\'shildi');
+      }
+      closeModal();
+      await loadFilterProducts();
+      loadData();
+    } catch(e) { Toast.error(e.message); }
+    finally { btn.disabled = false; btn.textContent = 'Saqlash'; }
+  }
+
+  async function deleteStockOut(id) {
+    Confirm.show('Bu chiqimni o\'chirishni tasdiqlaysizmi? Ombor qoldig\'i tiklanaadi.', 'O\'chirishni tasdiqlash', async () => {
+      try {
+        await api.delete(`/stock-out/${id}`);
+        Toast.success('Chiqim o\'chirildi');
+        await loadFilterProducts();
+        loadData();
+      } catch(e) { Toast.error(e.message); }
+    });
+  }
+
+  document.getElementById('stockout-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('stockout-modal')) closeModal();
+  });
+
+  init();
+</script>
+</body>
+</html>

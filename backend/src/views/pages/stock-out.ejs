@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="dark">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+<div class="admin-layout" id="admin-layout">
+  <%- include('../partials/sidebar') %>
+
+  <div class="main-content">
+    <%- include('../partials/navbar') %>
+
+    <main class="page-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Chiqim</h1>
+          <p class="page-subtitle">Mahsulot chiqim operatsiyalari</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal()" id="add-btn">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Yangi chiqim
+        </button>
+      </div>
+
+      <div class="stats-cards" style="grid-template-columns:repeat(3,1fr)">
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background:rgba(59,130,246,0.15)">
+            <svg width="28" height="28" fill="none" stroke="#3b82f6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2"/></svg>
+          </div>
+          <div class="stat-card-body">
+            <div class="stat-card-label">Operatsiyalar</div>
+            <div class="stat-card-value" id="stat-count">-</div>
+            <div class="stat-card-meta">Tanlangan filtr bo'yicha</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background:rgba(59,130,246,0.15)">
+            <svg width="28" height="28" fill="none" stroke="#3b82f6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+          </div>
+          <div class="stat-card-body">
+            <div class="stat-card-label">Umumiy miqdor</div>
+            <div class="stat-card-value" id="stat-qty">-</div>
+            <div class="stat-card-meta">Joriy sahifadagi</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon" style="background:rgba(59,130,246,0.15)">
+            <svg width="28" height="28" fill="none" stroke="#3b82f6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <div class="stat-card-body">
+            <div class="stat-card-label">Oluvchilar</div>
+            <div class="stat-card-value" id="stat-recipients">-</div>
+            <div class="stat-card-meta">Joriy sahifadagi</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="toolbar" style="margin:0;flex:1">
+            <div class="toolbar-left">
+              <select id="product-filter" class="form-control" style="width:220px">
+                <option value="">Barcha mahsulotlar</option>
+              </select>
+              <input type="date" id="start-date" class="form-control" style="width:160px" title="Boshlanish sanasi">
+              <input type="date" id="end-date" class="form-control" style="width:160px" title="Tugash sanasi">
+              <button class="btn btn-secondary btn-sm" onclick="resetFilters()">Tozalash</button>
+            </div>
+            <div class="toolbar-right">
+              <span id="total-count" class="text-sm text-muted"></span>
+            </div>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Sana</th>
+                <th>Mahsulot</th>
+                <th>Miqdor</th>
+                <th>Oluvchi</th>
+                <th>Telefon</th>
+                <th>Izoh</th>
+                <th>Xodim</th>
+                <th style="width:100px">Amallar</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+        <div class="card-footer" style="display:flex;align-items:center;justify-content:space-between">
+          <span id="page-info" class="text-sm text-muted"></span>
+          <div id="pagination"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Chiqim modal -->
+<div class="modal-overlay" id="stock-out-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modal-title">Yangi chiqim</h3>
+      <button class="modal-close" onclick="closeModal()">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <form id="stock-out-form" novalidate>
+        <div class="grid grid-2" style="gap:16px">
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Mahsulot <span style="color:var(--danger)">*</span></label>
+            <select id="productId" class="form-control">
+              <option value="">Mahsulot tanlang</option>
+            </select>
+            <span id="productId-error" class="form-error"></span>
+            <span class="form-hint" id="product-hint"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Miqdor <span style="color:var(--danger)">*</span></label>
+            <input type="number" id="quantity" class="form-control" placeholder="0" min="0.01" step="0.01">
+            <span id="quantity-error" class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sana</label>
+            <input type="date" id="date" class="form-control">
+            <span id="date-error" class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Oluvchi ismi <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="recipientName" class="form-control" placeholder="Ism familiya">
+            <span id="recipientName-error" class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Oluvchi telefoni</label>
+            <input type="text" id="recipientPhone" class="form-control" placeholder="+998 XX XXX XX XX">
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Izoh</label>
+            <textarea id="notes" class="form-control" rows="2" placeholder="Qo'shimcha izoh..."></textarea>
+          </div>
+          <div style="grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:var(--radius-md);background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2)">
+            <span class="form-label" style="margin:0">Chiqimdan keyingi qoldiq</span>
+            <span id="stock-preview" style="font-size:18px;font-weight:700;color:var(--primary)">-</span>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Bekor qilish</button>
+      <button class="btn btn-primary" id="save-btn" onclick="save()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<%- include('../partials/scripts') %>
+
+<script>
+  if (!Layout.init()) throw new Error('Auth failed');
+  Layout.setBreadcrumb([{label: 'Omborxona'}, {label: 'Chiqim'}]);
+
+  let currentPage = 1;
+  let editingId = null;
+  let editingOldQty = 0;
+  let products = [];
+
+  const user = Auth.getUser();
+  const canManage = Auth.hasPermission('stock:create') || user?.role?.name === 'Admin';
+
+  if (!canManage) document.getElementById('add-btn').style.display = 'none';
+
+  const productFilter = document.getElementById('product-filter');
+  const startDate = document.getElementById('start-date');
+  const endDate = document.getElementById('end-date');
+
+  productFilter.addEventListener('change', () => { currentPage = 1; load(); });
+
+  startDate.addEventListener('change', () => {
+    const today = Utils.getTodayString();
+    if (startDate.value && startDate.value > today) {
+      Toast.warning('Sana bugungi kundan katta bo\'lishi mumkin emas');
+      startDate.value = today;
+    }
+    currentPage = 1;
+    load();
+  });
+
+  endDate.addEventListener('change', () => {
+    const today = Utils.getTodayString();
+    if (endDate.value && endDate.value > today) {
+      Toast.warning('Sana bugungi kundan katta bo\'lishi mumkin emas');
+      endDate.value = today;
+    }
+    currentPage = 1;
+    load();
+  });
+
+  function resetFilters() {
+    productFilter.value = '';
+    startDate.value = '';
+    endDate.value = '';
+    currentPage = 1;
+    load();
+  }
+
+  async function init() {
+    const today = Utils.getTodayString();
+    startDate.max = today;
+    endDate.max = today;
+    document.getElementById('date').max = today;
+    await loadProducts();
+    load();
+    Utils.setupPhoneInput('recipientPhone');
+  }
+
+  async function loadProducts() {
+    try {
+      const data = await api.get('/products', { limit: 1000, isActive: 'true' });
+      products = (data && data.data) ? data.data : [];
+      const opts = products.map(p =>
+        `<option value="${p.id}">${Utils.escapeHtml(p.code)} — ${Utils.escapeHtml(p.name)}</option>`
+      ).join('');
+      productFilter.innerHTML = '<option value="">Barcha mahsulotlar</option>' + opts;
+      document.getElementById('productId').innerHTML = '<option value="">Mahsulot tanlang</option>' + opts;
+    } catch (e) {
+      console.warn('Mahsulotlarni yuklab bo\'lmadi:', e);
+    }
+  }
+
+  async function load() {
+    const tbody = document.getElementById('table-body');
+    tbody.innerHTML = Utils.getSkeletonRows(8, 5);
+    try {
+      if (startDate.value && endDate.value && startDate.value > endDate.value) {
+        Toast.warning('Boshlanish sanasi tugash sanasidan katta bo\'lishi mumkin emas');
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--warning)">Boshlanish sanasi tugash sanasidan katta bo\'lishi mumkin emas</td></tr>';
+        return;
+      }
+      const params = { page: currentPage, limit: 15 };
+      if (productFilter.value) params.productId = productFilter.value;
+      if (startDate.value) params.startDate = startDate.value;
+      if (endDate.value) params.endDate = endDate.value + 'T23:59:59';
+
+      const data = await api.get('/stock-out', params);
+      renderTable(data.data);
+      renderStats(data.data, data.pagination);
+
+      const p = data.pagination;
+      document.getElementById('total-count').textContent = `Jami: ${p.total} ta`;
+      document.getElementById('page-info').textContent = p.total
+        ? `${((p.page - 1) * p.limit) + 1}-${Math.min(p.page * p.limit, p.total)} / ${p.total}`
+        : '';
+
+      const paginationEl = document.getElementById('pagination');
+      paginationEl.innerHTML = Utils.generatePaginationHTML(p);
+      Utils.setupPagination(paginationEl, (pg) => { currentPage = pg; load(); });
+    } catch (e) {
+      Toast.error(e.message);
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--danger)">${Utils.escapeHtml(e.message)}</td></tr>`;
+    }
+  }
+
+  function renderStats(rows, pagination) {
+    const qty = rows.reduce((s, r) => s + parseFloat(r.quantity || 0), 0);
+    const recipients = new Set(rows.map(r => (r.recipientName || '').trim().toLowerCase()).filter(Boolean));
+    document.getElementById('stat-count').textContent = Utils.formatNumber(pagination.total);
+    document.getElementById('stat-qty').textContent = Utils.formatNumber(qty, qty % 1 ? 2 : 0);
+    document.getElementById('stat-recipients').textContent = Utils.formatNumber(recipients.size);
+  }
+
+  function renderTable(rows) {
+    const tbody = document.getElementById('table-body');
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-state-title">Chiqim topilmadi</div><p class="empty-state-description">Tanlangan filtr bo'yicha chiqim operatsiyalari yo'q</p></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td>${Utils.formatDate(r.date)}</td>
+        <td>
+          <span style="font-weight:500">${Utils.escapeHtml(r.product?.name || '-')}</span>
+          <br><span class="text-xs text-muted">${Utils.escapeHtml(r.product?.code || '')}</span>
+        </td>
+        <td><span style="font-weight:600;color:var(--warning)">-${Utils.formatNumber(r.quantity, 2)}</span> ${Utils.escapeHtml(r.product?.unit?.symbol || '')}</td>
+        <td><span style="font-weight:500">${Utils.escapeHtml(r.recipientName || '-')}</span></td>
+        <td class="text-sm">${Utils.escapeHtml(r.recipientPhone || '-')}</td>
+        <td class="text-sm text-muted">${Utils.escapeHtml(Utils.truncate(r.notes, 28))}</td>
+        <td class="text-sm">${Utils.escapeHtml(r.user?.fullName || '-')}</td>
+        <td>
+          ${canManage ? `
+          <div class="table-actions">
+            <button class="btn btn-secondary btn-sm btn-icon" onclick="edit('${r.id}')" title="Tahrirlash">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            </button>
+            <button class="btn btn-danger btn-sm btn-icon" onclick="remove('${r.id}', ${JSON.stringify(r.product?.name || '').replace(/"/g, '&quot;')})" title="O'chirish">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </div>` : '<span class="text-muted text-sm">-</span>'}
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  /* ---------- Modal ---------- */
+
+  function selectedProduct() {
+    return products.find(x => x.id === document.getElementById('productId').value);
+  }
+
+  function updatePreview() {
+    const p = selectedProduct();
+    const el = document.getElementById('stock-preview');
+    if (!p) { el.textContent = '-'; el.style.color = 'var(--primary)'; return; }
+
+    const qty = parseFloat(document.getElementById('quantity').value) || 0;
+    // Tahrirlashda eski miqdor avval omborga qaytariladi
+    const available = parseFloat(p.currentStock) + (editingId ? editingOldQty : 0);
+    const left = available - qty;
+
+    el.textContent = `${Utils.formatNumber(left, 2)} ${p.unit?.symbol || ''}`;
+    el.style.color = left < 0 ? 'var(--danger)' : 'var(--primary)';
+  }
+
+  document.getElementById('quantity').addEventListener('input', updatePreview);
+
+  document.getElementById('productId').addEventListener('change', () => {
+    const p = selectedProduct();
+    const hint = document.getElementById('product-hint');
+    hint.textContent = p
+      ? `Mavjud qoldiq: ${Utils.formatNumber(p.currentStock, 2)} ${p.unit?.symbol || ''}`
+      : '';
+    updatePreview();
+  });
+
+  function openModal(id = null) {
+    editingId = id;
+    document.getElementById('modal-title').textContent = id ? 'Chiqimni tahrirlash' : 'Yangi chiqim';
+    clearForm();
+    const dateInput = document.getElementById('date');
+    dateInput.max = Utils.getTodayString();
+    // Mahsulotni faqat yangi chiqimda tanlash mumkin - backend uni yangilamaydi
+    document.getElementById('productId').disabled = !!id;
+    if (!id) dateInput.value = Utils.getTodayString();
+    Utils.clearFormErrors('stock-out-modal');
+    document.getElementById('stock-out-modal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('stock-out-modal').classList.remove('active');
+    editingId = null;
+    editingOldQty = 0;
+    clearForm();
+    Utils.clearFormErrors('stock-out-modal');
+  }
+
+  function clearForm() {
+    ['productId', 'quantity', 'date', 'recipientName', 'recipientPhone', 'notes'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    ['productId', 'quantity', 'recipientName', 'date'].forEach(id => {
+      const el = document.getElementById(id + '-error');
+      if (el) el.textContent = '';
+    });
+    document.getElementById('product-hint').textContent = '';
+    document.getElementById('stock-preview').textContent = '-';
+    Utils.clearFormErrors('stock-out-modal');
+  }
+
+  async function edit(id) {
+    try {
+      const data = await api.get(`/stock-out/${id}`);
+      const r = data.data;
+      openModal(id);
+      editingOldQty = parseFloat(r.quantity);
+      document.getElementById('productId').value = r.productId;
+      document.getElementById('quantity').value = parseFloat(r.quantity);
+      document.getElementById('date').value = Utils.formatDateInput(r.date);
+      document.getElementById('recipientName').value = r.recipientName || '';
+      document.getElementById('recipientPhone').value = r.recipientPhone || '';
+      document.getElementById('notes').value = r.notes || '';
+      document.getElementById('productId').dispatchEvent(new Event('change'));
+    } catch (e) {
+      Utils.handleApiError(e);
+    }
+  }
+
+  async function save() {
+    Utils.clearFormErrors('stock-out-modal');
+    let valid = true;
+    const setErr = (id, msg) => {
+      const el = document.getElementById(id + '-error');
+      const inputEl = document.getElementById(id);
+      if (el) el.textContent = msg || '';
+      if (msg) {
+        valid = false;
+        if (inputEl) inputEl.classList.add('is-invalid');
+      }
+    };
+
+    setErr('productId', '');
+    setErr('quantity', '');
+    setErr('recipientName', '');
+    setErr('date', '');
+
+    const productId = document.getElementById('productId').value;
+    const quantity = parseFloat(document.getElementById('quantity').value);
+    const recipientName = document.getElementById('recipientName').value.trim();
+    const dateVal = document.getElementById('date').value;
+
+    if (!productId) setErr('productId', 'Mahsulotni tanlang');
+    if (!(quantity > 0)) setErr('quantity', 'Miqdor 0 dan katta bo\'lishi kerak');
+    if (!recipientName) setErr('recipientName', 'Oluvchi ismini kiriting');
+    if (dateVal && Utils.isFutureDate(dateVal)) {
+      setErr('date', 'Sana bugungi kundan katta bo\'lishi mumkin emas');
+      Toast.warning('Sana bugungi kundan katta bo\'lishi mumkin emas');
+      return;
+    }
+
+    // Omborda yetarli mahsulot bor-yo'qligini oldindan tekshiramiz
+    const p = selectedProduct();
+    if (p && quantity > 0) {
+      const available = parseFloat(p.currentStock) + (editingId ? editingOldQty : 0);
+      if (quantity > available) {
+        setErr('quantity', `Omborda faqat ${Utils.formatNumber(available, 2)} ${p.unit?.symbol || ''} mavjud`);
+      }
+    }
+    if (!valid) return;
+
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saqlanmoqda...';
+
+    const body = {
+      productId,
+      quantity,
+      recipientName,
+      recipientPhone: document.getElementById('recipientPhone').value.trim() || undefined,
+      date: document.getElementById('date').value || undefined,
+      notes: document.getElementById('notes').value.trim() || undefined
+    };
+
+    try {
+      if (editingId) {
+        await api.put(`/stock-out/${editingId}`, body);
+        Toast.success('Chiqim yangilandi');
+      } else {
+        await api.post('/stock-out', body);
+        Toast.success('Chiqim qo\'shildi');
+      }
+      closeModal();
+      await loadProducts();
+      load();
+    } catch (e) {
+      Utils.handleApiError(e, 'stock-out-modal');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Saqlash';
+    }
+  }
+
+  async function remove(id, name) {
+    Confirm.show(
+      `"${name || 'Mahsulot'}" chiqimini o'chirasizmi? Ombor qoldig'i shu miqdorga ortadi.`,
+      'O\'chirishni tasdiqlash',
+      async () => {
+        try {
+          await api.delete(`/stock-out/${id}`);
+          Toast.success('Chiqim o\'chirildi');
+          await loadProducts();
+          load();
+        } catch (e) {
+          Utils.handleApiError(e);
+        }
+      }
+    );
+  }
+
+  document.getElementById('stock-out-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('stock-out-modal')) closeModal();
+  });
+
+  init();
+</script>
+</body>
+</html>

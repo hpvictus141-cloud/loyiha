@@ -1,0 +1,102 @@
+{
+  "timestamp": "2026-09-08T15:42:30.000Z",
+  "skeptic": "bug-hunter-skeptic",
+  "evaluations": [
+    {
+      "id": "BH-001",
+      "challenge": "Can unauthenticated attackers know the admin roleId if GET /api/roles requires authentication?",
+      "verification": "Confirmed reachable. Role UUIDs can be enumerated, guessed if static seeds are used, or obtained if public registrations occur. Even without roleId, if no users exist it grants Admin, but accepting roleId directly from client payload is textbook CWE-269 Mass Assignment.",
+      "status": "VALID_BUG"
+    },
+    {
+      "id": "BH-002",
+      "challenge": "Does auditLog run on login endpoint where users enter passwords?",
+      "verification": "Login route does not use auditLog, but user.routes.js explicitly attaches auditLog('users', 'create') to POST /api/users and auditLog('users', 'update') to POST /:id/change-password. In both endpoints req.body contains plaintext passwords. Confirmed plain text storage in AuditLog.",
+      "status": "VALID_BUG"
+    },
+    {
+      "id": "BH-003",
+      "challenge": "Does the operator have backend permissions to access stock-in, stock-out, inventory?",
+      "verification": "Yes. Backend seed.js and grantOperatorPermissions.js grant stock:create, stock:update, stock:delete, suppliers:create etc. to Operator. However, frontend layout.js explicitly hides the entire Omborxona section and Suppliers from non-admin users in the sidebar.",
+      "status": "VALID_BUG"
+    },
+    {
+      "id": "BH-004",
+      "challenge": "Isn't createStockOut wrapped in prisma.$transaction?",
+      "verification": "Interactive transactions in Prisma under PostgreSQL default Read Committed isolation do not acquire exclusive locks on SELECT statements. Without SELECT FOR UPDATE or atomic decrement with CHECK constraint, two concurrent requests can both read currentStock = 10, both approve 8 items, and result in overdrawn inventory.",
+      "status": "VALID_BUG"
+    },
+    {
+      "id": "BH-005",
+      "challenge": "Does Prisma or PostgreSQL reject negative currentStock automatically?",
+      "verification": "Checked schema.prisma: currentStock Decimal @default(0) @db.Decimal(15, 2). There is no CHECK constraint in PostgreSQL. updateStockIn computes newStock = oldStock + quantityDiff without validating newStock >= 0. Negative stock will be persisted.",
+      "status": "VALID_BUG"
+    },
+    {
+      "id": "BH-006",
+      "challenge": "Does Prisma sanitize sortBy parameter?",
+      "verification": "Verified experimentally: Passing an invalid column name to Prisma findMany orderBy throws PrismaClientValidationError, which errorHandler.js does not catch as a validation error, resulting in HTTP 500 error leaking schema definition.",
+      "status": "VALID_BUG"
+    },
+    {
+      "id": "BH-007",
+      "challenge": "Doesn't Utils.escapeHtml prevent HTML injection?",
+      "verification": "Utils.escapeHtml uses div.innerHTML, which only escapes &, <, >. In JavaScript inline attribute strings (onclick=\"deleteProduct('id', 'name')\"), an unescaped single quote in an Uzbek name like Bo'yoq terminates the string literal and triggers Uncaught SyntaxError.",
+      "status": "VALID_BUG"
+    },
+    {
+      "id": "BH-008",
+      "challenge": "Is hardcoded localhost:3010 problematic for local development?",
+      "verification": "In local single-machine dev using localhost it works. But the moment the app is accessed by IP (e.g. tablet, barcode scanner), mobile, or deployed, API_BASE points to the user's localhost device, causing complete failure.",
+      "status": "VALID_BUG"
+    },
+    {
+      "id": "BH-009",
+      "challenge": "Does foreign key violation happen if records are already deleted?",
+      "verification": "If products or suppliers have transaction records, deleteProduct and deleteSupplier will trigger P2003 foreign key violation. Category deletion handles this via productsCount check, but products and suppliers omit the check.",
+      "status": "VALID_BUG"
+    },
+    {
+      "id": "BH-010",
+      "challenge": "Can an attacker read notifications of other users through IDOR?",
+      "verification": "The endpoint is PUT /:id/read, so it only marks notifications as read, does not read content. Still an IDOR authorization violation.",
+      "status": "VALID_BUG"
+    },
+    {
+      "id": "BH-011",
+      "challenge": "Does markAllRead affect system stability?",
+      "verification": "It does not crash the system, but it is a misleading mock UI action that claims notifications were marked as read when no backend state was modified.",
+      "status": "VALID_BUG"
+    },
+    {
+      "id": "BH-012",
+      "challenge": "Is low stock notification intended only for the actor?",
+      "verification": "Low stock is an inventory warning meant for warehouse managers and administrators to re-order products, not just the operator who happened to take the last item.",
+      "status": "VALID_BUG"
+    },
+    {
+      "id": "BH-013",
+      "challenge": "Does frontend send non-numeric data on product update?",
+      "verification": "API endpoints must enforce input validation independently of frontend UI controls. Anyone with products:update can crash the endpoint with 500 by submitting invalid price values.",
+      "status": "VALID_BUG"
+    },
+    {
+      "id": "BH-014",
+      "challenge": "Does express-session harm when unused?",
+      "verification": "MemoryStore leaks memory and emits production warnings. It creates and signs session cookies on every response needlessly.",
+      "status": "VALID_BUG"
+    },
+    {
+      "id": "BH-015",
+      "challenge": "Is session invalidation needed when admin changes password?",
+      "verification": "Yes. If an account is hijacked or an employee leaves, an admin changing the password must terminate their active session tokens immediately.",
+      "status": "VALID_BUG"
+    },
+    {
+      "id": "BH-016",
+      "challenge": "Does frontend send time in endDate?",
+      "verification": "Frontend stock-in.ejs adds T23:59:59, but report.routes.js and direct API calls do not, leading to inconsistent reporting depending on client.",
+      "status": "VALID_BUG"
+    }
+  ]
+}

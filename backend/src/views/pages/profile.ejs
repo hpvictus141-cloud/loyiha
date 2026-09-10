@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="dark">
+<head>
+  <%- include('../partials/head') %>
+  <style>
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 1100px) {
+      .profile-grid { grid-template-columns: 1fr; }
+    }
+
+    .identity-card { position: sticky; top: 88px; }
+
+    .profile-avatar {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 18px;
+      font-size: 34px;
+      font-weight: 700;
+      color: #e2e8f0;
+      letter-spacing: 1px;
+    }
+
+    .profile-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .profile-username { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+
+    .fact-list { margin-top: 24px; display: flex; flex-direction: column; gap: 2px; }
+    .fact {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 11px 0;
+      border-top: 1px solid var(--border);
+      text-align: left;
+    }
+    .fact svg { flex-shrink: 0; margin-top: 2px; color: var(--text-muted); }
+    .fact-label { font-size: 12px; color: var(--text-muted); }
+    .fact-value { font-size: 14px; color: var(--text-primary); word-break: break-word; }
+
+    .perm-group { margin-bottom: 16px; }
+    .perm-group:last-child { margin-bottom: 0; }
+    .perm-module {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .perm-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .timeline { display: flex; flex-direction: column; }
+    .timeline-item {
+      display: flex;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .timeline-item:last-child { border-bottom: none; }
+    .timeline-dot {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--primary);
+    }
+    .timeline-body { flex: 1; min-width: 0; }
+    .timeline-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+    .timeline-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .strength-bar {
+      height: 5px;
+      border-radius: 3px;
+      background: var(--bg-tertiary);
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .strength-fill {
+      height: 100%;
+      width: 0;
+      border-radius: 3px;
+      transition: width 0.25s ease, background 0.25s ease;
+    }
+  </style>
+</head>
+<body>
+<div class="admin-layout" id="admin-layout">
+  <%- include('../partials/sidebar') %>
+
+  <div class="main-content">
+    <%- include('../partials/navbar') %>
+
+    <main class="page-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Profil</h1>
+          <p class="page-subtitle">Shaxsiy ma'lumotlar, xavfsizlik va faoliyat</p>
+        </div>
+      </div>
+
+      <div class="profile-grid">
+        <!-- ============ CHAP: SHAXS KARTASI ============ -->
+        <div class="card identity-card">
+          <div class="card-body" style="text-align:center;padding:32px 24px">
+            <div class="profile-avatar" id="profile-avatar">–</div>
+            <h3 class="profile-name" id="profile-name">Yuklanmoqda…</h3>
+            <p class="profile-username" id="profile-username">-</p>
+            <div style="display:flex;justify-content:center;gap:6px;flex-wrap:wrap">
+              <span class="badge badge-info" id="profile-role">-</span>
+              <span class="badge badge-secondary" id="profile-status">-</span>
+            </div>
+
+            <div class="fact-list">
+              <div class="fact">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <div><div class="fact-label">Email</div><div class="fact-value" id="fact-email">-</div></div>
+              </div>
+              <div class="fact">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                <div><div class="fact-label">Telefon</div><div class="fact-value" id="fact-phone">-</div></div>
+              </div>
+              <div class="fact">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <div><div class="fact-label">Ro'yxatdan o'tgan</div><div class="fact-value" id="fact-created">-</div></div>
+              </div>
+              <div class="fact">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div><div class="fact-label">So'nggi kirish</div><div class="fact-value" id="fact-lastlogin">-</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ O'NG USTUN ============ -->
+        <div style="display:flex;flex-direction:column;gap:24px">
+
+          <!-- Faoliyat statistikasi -->
+          <div class="stats-cards" style="margin-bottom:0">
+            <div class="stat-card">
+              <div class="stat-card-icon" style="background:rgba(59,130,246,0.15)">
+                <svg width="28" height="28" fill="none" stroke="#3b82f6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              </div>
+              <div class="stat-card-body">
+                <div class="stat-card-label">Jami amallar</div>
+                <div class="stat-card-value" id="stat-total">-</div>
+                <div class="stat-card-meta">Harakatlar tarixi bo'yicha</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-icon" style="background:rgba(59,130,246,0.15)">
+                <svg width="28" height="28" fill="none" stroke="#3b82f6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              </div>
+              <div class="stat-card-body">
+                <div class="stat-card-label">Kirim amallari</div>
+                <div class="stat-card-value" id="stat-in">-</div>
+                <div class="stat-card-meta">Ombor kirimi</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-icon" style="background:rgba(59,130,246,0.15)">
+                <svg width="28" height="28" fill="none" stroke="#3b82f6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+              </div>
+              <div class="stat-card-body">
+                <div class="stat-card-label">Chiqim amallari</div>
+                <div class="stat-card-value" id="stat-out">-</div>
+                <div class="stat-card-meta">Ombor chiqimi</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-icon" style="background:rgba(59,130,246,0.15)">
+                <svg width="28" height="28" fill="none" stroke="#3b82f6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              </div>
+              <div class="stat-card-body">
+                <div class="stat-card-label">Tizimda</div>
+                <div class="stat-card-value" id="stat-days">-</div>
+                <div class="stat-card-meta" id="stat-days-meta">-</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shaxsiy ma'lumotlar -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Shaxsiy ma'lumotlar</h3>
+              <button class="btn btn-secondary btn-sm" onclick="startEdit()" id="edit-btn">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                Tahrirlash
+              </button>
+            </div>
+            <div class="card-body">
+              <div class="grid grid-2" style="gap:20px">
+                <div class="form-group">
+                  <label class="form-label">To'liq ism <span style="color:var(--danger)">*</span></label>
+                  <input type="text" id="fullName" class="form-control" disabled>
+                  <span id="fullName-error" class="form-error"></span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Telefon</label>
+                  <input type="text" id="phone" class="form-control" disabled>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Foydalanuvchi nomi</label>
+                  <input type="text" id="username" class="form-control" disabled>
+                  <span class="form-hint">Login o'zgartirilmaydi</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Email</label>
+                  <input type="email" id="email" class="form-control" disabled>
+                  <span class="form-hint">Emailni administrator o'zgartiradi</span>
+                </div>
+              </div>
+
+              <div id="form-actions" style="display:none;margin-top:22px;gap:12px">
+                <button type="button" class="btn btn-primary" id="save-btn" onclick="saveProfile()">Saqlash</button>
+                <button type="button" class="btn btn-secondary" onclick="cancelEdit()">Bekor qilish</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Xavfsizlik -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Xavfsizlik</h3>
+            </div>
+            <div class="card-body">
+              <div class="grid grid-2" style="gap:24px">
+                <div>
+                  <h4 style="font-size:15px;font-weight:600;margin-bottom:6px">Parol</h4>
+                  <p style="font-size:14px;color:var(--text-secondary);margin-bottom:16px">
+                    Parolni o'zgartirgandan so'ng barcha qurilmalardagi sessiyalar yopiladi va qaytadan kirish talab qilinadi.
+                  </p>
+                  <button class="btn btn-secondary" onclick="openPasswordModal()">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                    Parolni o'zgartirish
+                  </button>
+                </div>
+                <div>
+                  <h4 style="font-size:15px;font-weight:600;margin-bottom:6px">Hisob holati</h4>
+                  <div class="fact" style="border-top:none;padding-top:0">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div><div class="fact-label">Holat</div><div class="fact-value" id="sec-status">-</div></div>
+                  </div>
+                  <div class="fact">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div><div class="fact-label">So'nggi kirish</div><div class="fact-value" id="sec-lastlogin">-</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ruxsatlar -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Ruxsatlar</h3>
+              <span class="text-sm text-muted" id="perm-count"></span>
+            </div>
+            <div class="card-body" id="permissions-body">
+              <div class="empty-state" style="padding:24px"><p class="empty-state-description">Yuklanmoqda…</p></div>
+            </div>
+          </div>
+
+          <!-- So'nggi harakatlar -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">So'nggi harakatlaringiz</h3>
+              <a href="/audit-logs" class="text-sm">Barchasi →</a>
+            </div>
+            <div class="card-body" id="activity-body">
+              <div class="empty-state" style="padding:24px"><p class="empty-state-description">Yuklanmoqda…</p></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Parol modal -->
+<div class="modal-overlay" id="password-modal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <h3 class="modal-title">Parolni o'zgartirish</h3>
+      <button class="modal-close" onclick="closePasswordModal()">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <form id="password-form" novalidate>
+        <div class="form-group">
+          <label class="form-label">Joriy parol <span style="color:var(--danger)">*</span></label>
+          <input type="password" id="currentPassword" class="form-control" placeholder="Joriy parolingiz" autocomplete="current-password">
+          <span id="currentPassword-error" class="form-error"></span>
+        </div>
+        <div class="form-group" style="margin-top:16px">
+          <label class="form-label">Yangi parol <span style="color:var(--danger)">*</span></label>
+          <input type="password" id="newPassword" class="form-control" placeholder="Kamida 6 ta belgi" autocomplete="new-password">
+          <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+          <span class="form-hint" id="strength-text">Parol kuchi</span>
+          <span id="newPassword-error" class="form-error"></span>
+        </div>
+        <div class="form-group" style="margin-top:16px">
+          <label class="form-label">Parolni tasdiqlang <span style="color:var(--danger)">*</span></label>
+          <input type="password" id="confirmPassword" class="form-control" placeholder="Yangi parolni qayta kiriting" autocomplete="new-password">
+          <span id="confirmPassword-error" class="form-error"></span>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closePasswordModal()">Bekor qilish</button>
+      <button class="btn btn-primary" id="pw-save-btn" onclick="changePassword()">O'zgartirish</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<%- include('../partials/scripts') %>
+
+<script>
+  if (!Layout.init()) throw new Error('Auth failed');
+  Layout.setBreadcrumb([{label: 'Profil'}]);
+
+  let me = null;        // /auth/profile dan kelgan yangi ma'lumot
+  let snapshot = {};    // tahrirni bekor qilish uchun
+
+  const MODULE_LABELS = {
+    auth: 'Autentifikatsiya', users: 'Foydalanuvchilar', products: 'Mahsulotlar',
+    categories: 'Kategoriyalar', suppliers: 'Yetkazib beruvchilar', stock: 'Ombor',
+    settings: 'Sozlamalar', audit: 'Harakatlar tarixi', inventory: 'Inventarizatsiya',
+    reports: 'Hisobotlar', '*': 'Barcha bo\'limlar'
+  };
+
+  const ACTION_LABELS = {
+    create: 'Qo\'shish', read: 'Ko\'rish', update: 'Tahrirlash', delete: 'O\'chirish',
+    in: 'Kirim', out: 'Chiqim', 'in-update': 'Kirim tuzatish', 'out-update': 'Chiqim tuzatish',
+    'in-delete': 'Kirim o\'chirish', 'out-delete': 'Chiqim o\'chirish',
+    login: 'Kirish', logout: 'Chiqish', '*': 'Barcha amallar'
+  };
+
+  const moduleLabel = (m) => MODULE_LABELS[m] || m;
+  const actionLabel = (a) => ACTION_LABELS[a] || a;
+
+  /* ---------- Yuklash ---------- */
+
+  async function loadProfile() {
+    try {
+      const data = await api.get('/auth/profile');
+      me = data.data;
+
+      // localStorage'dagi nusxani ham yangilaymiz - sidebar shundan o'qiydi
+      api.setUser(me);
+
+      renderIdentity();
+      renderPermissions();
+    } catch (e) {
+      Toast.error(e.message);
+    }
+  }
+
+  function renderIdentity() {
+    const initials = (me.fullName || '?')
+      .split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2);
+
+    document.getElementById('profile-avatar').textContent = initials || '?';
+    document.getElementById('profile-name').textContent = me.fullName || '-';
+    document.getElementById('profile-username').textContent = '@' + (me.username || '-');
+    document.getElementById('profile-role').textContent = me.role?.name || '-';
+
+    const statusEl = document.getElementById('profile-status');
+    statusEl.textContent = me.isActive ? 'Faol' : 'Faol emas';
+    statusEl.className = 'badge ' + (me.isActive ? 'badge-success' : 'badge-danger');
+
+    const lastLogin = me.lastLogin ? Utils.formatDate(me.lastLogin, 'DD.MM.YYYY HH:mm') : 'Ma\'lumot yo\'q';
+
+    document.getElementById('fact-email').textContent = me.email || '-';
+    document.getElementById('fact-phone').textContent = me.phone || 'Kiritilmagan';
+    document.getElementById('fact-created').textContent = Utils.formatDate(me.createdAt, 'DD.MM.YYYY HH:mm');
+    document.getElementById('fact-lastlogin').textContent = lastLogin;
+
+    document.getElementById('sec-status').textContent = me.isActive ? 'Faol hisob' : 'Bloklangan hisob';
+    document.getElementById('sec-lastlogin').textContent = lastLogin;
+
+    // Forma maydonlari
+    document.getElementById('fullName').value = me.fullName || '';
+    document.getElementById('phone').value = me.phone || '';
+    document.getElementById('username').value = me.username || '';
+    document.getElementById('email').value = me.email || '';
+
+    // Tizimda necha kun
+    const days = Math.max(0, Math.floor((Date.now() - new Date(me.createdAt)) / 86400000));
+    document.getElementById('stat-days').textContent = Utils.formatNumber(days);
+    document.getElementById('stat-days-meta').textContent = days === 1 ? 'kun' : 'kun davomida';
+  }
+
+  function renderPermissions() {
+    const body = document.getElementById('permissions-body');
+    const perms = me.role?.permissions || [];
+
+    if (!perms.length) {
+      body.innerHTML = `<div class="empty-state" style="padding:24px">
+        <div class="empty-state-title">Ruxsatlar berilmagan</div>
+        <p class="empty-state-description">"${Utils.escapeHtml(me.role?.name || '-')}" roliga hech qanday ruxsat biriktirilmagan. Administratorga murojaat qiling.</p>
+      </div>`;
+      document.getElementById('perm-count').textContent = '0 ta ruxsat';
+      return;
+    }
+
+    const groups = {};
+    perms.forEach(p => {
+      (groups[p.module] = groups[p.module] || []).push(p.action);
+    });
+
+    body.innerHTML = Object.keys(groups).sort().map(mod => `
+      <div class="perm-group">
+        <div class="perm-module">${Utils.escapeHtml(moduleLabel(mod))}</div>
+        <div class="perm-badges">
+          ${groups[mod].sort().map(a => `<span class="badge badge-info">${Utils.escapeHtml(actionLabel(a))}</span>`).join('')}
+        </div>
+      </div>
+    `).join('');
+
+    document.getElementById('perm-count').textContent = `${perms.length} ta ruxsat`;
+  }
+
+  async function loadActivity() {
+    const body = document.getElementById('activity-body');
+    try {
+      // Admin uchun ham faqat o'z harakatlarini olamiz
+      const data = await api.get('/audit-logs', { userId: me.id, limit: 100 });
+      const logs = data.data.filter(l => l.userId === me.id);
+
+      const count = (mod, act) => logs.filter(l => l.module === mod && l.action === act).length;
+      document.getElementById('stat-total').textContent = Utils.formatNumber(data.pagination?.total ?? logs.length);
+      document.getElementById('stat-in').textContent = Utils.formatNumber(count('stock', 'in'));
+      document.getElementById('stat-out').textContent = Utils.formatNumber(count('stock', 'out'));
+
+      if (!logs.length) {
+        body.innerHTML = `<div class="empty-state" style="padding:24px">
+          <div class="empty-state-title">Harakatlar yo'q</div>
+          <p class="empty-state-description">Siz hali tizimda hech qanday amal bajarmagansiz</p>
+        </div>`;
+        return;
+      }
+
+      body.innerHTML = `<div class="timeline">${logs.slice(0, 10).map(l => `
+        <div class="timeline-item">
+          <div class="timeline-dot">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+          </div>
+          <div class="timeline-body">
+            <div class="timeline-title">${Utils.escapeHtml(moduleLabel(l.module))} — ${Utils.escapeHtml(actionLabel(l.action))}</div>
+            <div class="timeline-meta">${Utils.formatDate(l.createdAt, 'DD.MM.YYYY HH:mm')}${l.ipAddress ? ' · ' + Utils.escapeHtml(l.ipAddress) : ''}</div>
+          </div>
+        </div>
+      `).join('')}</div>`;
+    } catch (e) {
+      document.getElementById('stat-total').textContent = '0';
+      document.getElementById('stat-in').textContent = '0';
+      document.getElementById('stat-out').textContent = '0';
+      body.innerHTML = `<div class="empty-state" style="padding:24px"><p class="empty-state-description">Harakatlarni yuklab bo'lmadi: ${Utils.escapeHtml(e.message)}</p></div>`;
+    }
+  }
+
+  /* ---------- Tahrirlash ---------- */
+
+  function startEdit() {
+    snapshot = {
+      fullName: document.getElementById('fullName').value,
+      phone: document.getElementById('phone').value
+    };
+    document.getElementById('fullName').disabled = false;
+    document.getElementById('phone').disabled = false;
+    document.getElementById('form-actions').style.display = 'flex';
+    document.getElementById('edit-btn').style.display = 'none';
+    document.getElementById('fullName').focus();
+  }
+
+  function stopEdit() {
+    document.getElementById('fullName').disabled = true;
+    document.getElementById('phone').disabled = true;
+    document.getElementById('form-actions').style.display = 'none';
+    document.getElementById('edit-btn').style.display = 'inline-flex';
+    document.getElementById('fullName-error').textContent = '';
+  }
+
+  function cancelEdit() {
+    document.getElementById('fullName').value = snapshot.fullName;
+    document.getElementById('phone').value = snapshot.phone;
+    stopEdit();
+  }
+
+  async function saveProfile() {
+    const fullName = document.getElementById('fullName').value.trim();
+    const errEl = document.getElementById('fullName-error');
+    errEl.textContent = '';
+
+    if (!fullName) {
+      errEl.textContent = 'To\'liq ismni kiriting';
+      return;
+    }
+
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saqlanmoqda...';
+
+    try {
+      // Bu endpoint har qanday foydalanuvchi uchun ishlaydi (users:update ruxsati shart emas)
+      const res = await api.put('/auth/profile', {
+        fullName,
+        phone: document.getElementById('phone').value.trim() || null
+      });
+
+      // Faqat o'zgargan maydonlarni olamiz - bu endpoint role.permissions ni qaytarmaydi,
+      // to'liq almashtirsak ruxsatlar ro'yxati yo'qoladi
+      me = { ...me, fullName: res.data.fullName, phone: res.data.phone };
+      api.setUser(me);
+      Toast.success('Profil yangilandi');
+      stopEdit();
+      renderIdentity();
+      Layout.renderSidebar();
+    } catch (e) {
+      if (e.field === 'fullName' || (e.data && e.data.field === 'fullName')) {
+        document.getElementById('fullName').classList.add('is-invalid');
+        errEl.textContent = e.message;
+      }
+      Utils.handleApiError(e);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Saqlash';
+    }
+  }
+
+  /* ---------- Parol ---------- */
+
+  function scorePassword(pw) {
+    let score = 0;
+    if (pw.length >= 6) score++;
+    if (pw.length >= 10) score++;
+    if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) score++;
+    if (/\d/.test(pw)) score++;
+    if (/[^A-Za-z0-9]/.test(pw)) score++;
+    return Math.min(score, 4);
+  }
+
+  document.getElementById('newPassword').addEventListener('input', (e) => {
+    const pw = e.target.value;
+    const fill = document.getElementById('strength-fill');
+    const text = document.getElementById('strength-text');
+
+    if (!pw) {
+      fill.style.width = '0';
+      text.textContent = 'Parol kuchi';
+      text.style.color = 'var(--text-secondary)';
+      return;
+    }
+
+    const levels = [
+      { w: '25%', c: 'var(--danger)', t: 'Juda zaif' },
+      { w: '45%', c: 'var(--danger)', t: 'Zaif' },
+      { w: '65%', c: 'var(--warning)', t: 'O\'rtacha' },
+      { w: '85%', c: 'var(--info)', t: 'Yaxshi' },
+      { w: '100%', c: 'var(--success)', t: 'Kuchli' }
+    ];
+    const lv = levels[scorePassword(pw)];
+    fill.style.width = lv.w;
+    fill.style.background = lv.c;
+    text.textContent = 'Parol kuchi: ' + lv.t;
+    text.style.color = lv.c;
+  });
+
+  function openPasswordModal() {
+    document.getElementById('password-form').reset();
+    ['currentPassword', 'newPassword', 'confirmPassword'].forEach(id => {
+      document.getElementById(id + '-error').textContent = '';
+    });
+    document.getElementById('strength-fill').style.width = '0';
+    document.getElementById('strength-text').textContent = 'Parol kuchi';
+    document.getElementById('strength-text').style.color = 'var(--text-secondary)';
+    document.getElementById('password-modal').classList.add('active');
+  }
+
+  function closePasswordModal() {
+    document.getElementById('password-modal').classList.remove('active');
+  }
+
+  async function changePassword() {
+    const current = document.getElementById('currentPassword').value;
+    const newPass = document.getElementById('newPassword').value;
+    const confirm = document.getElementById('confirmPassword').value;
+
+    let valid = true;
+    const setErr = (id, msg) => {
+      document.getElementById(id + '-error').textContent = msg || '';
+      if (msg) valid = false;
+    };
+
+    setErr('currentPassword', '');
+    setErr('newPassword', '');
+    setErr('confirmPassword', '');
+
+    if (!current) setErr('currentPassword', 'Joriy parolni kiriting');
+    if (!newPass) setErr('newPassword', 'Yangi parolni kiriting');
+    else if (newPass.length < 6) setErr('newPassword', 'Parol kamida 6 ta belgidan iborat bo\'lishi kerak');
+    else if (newPass === current) setErr('newPassword', 'Yangi parol joriy paroldan farq qilishi kerak');
+    if (newPass !== confirm) setErr('confirmPassword', 'Parollar mos kelmadi');
+    if (!valid) return;
+
+    const btn = document.getElementById('pw-save-btn');
+    btn.disabled = true;
+    btn.textContent = 'O\'zgartirilmoqda...';
+
+    try {
+      await api.post('/auth/change-password', { currentPassword: current, newPassword: newPass });
+      closePasswordModal();
+      // Backend barcha sessiyalarni o'chiradi - shuning uchun qaytadan kirish kerak
+      Toast.success('Parol o\'zgartirildi. Qaytadan kirishingiz kerak…');
+      setTimeout(() => {
+        api.clearTokens();
+        window.location.href = '/login';
+      }, 1800);
+    } catch (e) {
+      Toast.error(e.message);
+      btn.disabled = false;
+      btn.textContent = 'O\'zgartirish';
+    }
+  }
+
+  document.getElementById('password-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('password-modal')) closePasswordModal();
+  });
+
+  /* ---------- Init ---------- */
+
+  async function init() {
+    await loadProfile();
+    if (me) {
+      Utils.setupPhoneInput('phone');
+      loadActivity();
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>

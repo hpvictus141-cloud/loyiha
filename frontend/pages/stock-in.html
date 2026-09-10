@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kirim - OmborXona</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/global.css">
+  <link rel="stylesheet" href="../assets/css/dashboard.css">
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="main-content">
+    <header class="navbar" id="navbar"></header>
+    <main class="page-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Kirim</h1>
+          <p class="page-subtitle">Mahsulot kirim operatsiyalari</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal()">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Yangi kirim
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="toolbar" style="margin:0;flex:1">
+            <div class="toolbar-left">
+              <select id="product-filter" class="form-control" style="width:220px">
+                <option value="">Barcha mahsulotlar</option>
+              </select>
+              <select id="supplier-filter" class="form-control" style="width:200px">
+                <option value="">Barcha yetkazib beruvchilar</option>
+              </select>
+              <input type="date" id="start-date" class="form-control" style="width:150px" title="Boshlanish sanasi">
+              <input type="date" id="end-date" class="form-control" style="width:150px" title="Tugash sanasi">
+            </div>
+            <div class="toolbar-right">
+              <span id="total-count" class="text-sm text-muted"></span>
+            </div>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Mahsulot</th>
+                <th>Miqdor</th>
+                <th>Narx</th>
+                <th>Jami summa</th>
+                <th>Yetkazib beruvchi</th>
+                <th>Hisob raqam</th>
+                <th>Sana</th>
+                <th>Kirituvchi</th>
+                <th style="width:100px">Amallar</th>
+              </tr>
+            </thead>
+            <tbody id="stockin-table"></tbody>
+          </table>
+        </div>
+        <div class="card-footer" style="display:flex;align-items:center;justify-content:space-between">
+          <span id="page-info" class="text-sm text-muted"></span>
+          <div id="pagination"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- StockIn Modal -->
+<div class="modal-overlay" id="stockin-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modal-title">Yangi kirim</h3>
+      <button class="modal-close" onclick="closeModal()">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <form id="stockin-form" novalidate>
+        <div class="grid grid-2" style="gap:16px">
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Mahsulot <span style="color:var(--danger)">*</span></label>
+            <select id="si-productId" class="form-control">
+              <option value="">Mahsulot tanlang</option>
+            </select>
+            <span id="si-productId-error" class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Miqdor <span style="color:var(--danger)">*</span></label>
+            <input type="number" id="si-quantity" class="form-control" placeholder="0" min="0.01" step="0.01">
+            <span id="si-quantity-error" class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Narx <span style="color:var(--danger)">*</span></label>
+            <input type="number" id="si-price" class="form-control" placeholder="0" min="0" step="0.01">
+            <span id="si-price-error" class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Yetkazib beruvchi</label>
+            <select id="si-supplierId" class="form-control">
+              <option value="">Tanlang (ixtiyoriy)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hisob raqam / Faktura</label>
+            <input type="text" id="si-invoiceNumber" class="form-control" placeholder="Hisob raqam">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sana</label>
+            <input type="date" id="si-date" class="form-control">
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Izoh</label>
+            <textarea id="si-notes" class="form-control" rows="2" placeholder="Qo'shimcha izoh..."></textarea>
+          </div>
+          <div class="form-group" style="grid-column:1/-1;background:var(--bg-secondary);padding:14px;border-radius:var(--radius);display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:14px;color:var(--text-secondary)">Jami summa:</span>
+            <span id="total-amount" style="font-size:18px;font-weight:700;color:var(--primary)">0 UZS</span>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Bekor qilish</button>
+      <button class="btn btn-primary" id="save-btn" onclick="saveStockIn()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/utils.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/layout.js"></script>
+<script>
+  if (!Layout.init()) throw new Error('Auth failed');
+  Layout.setBreadcrumb([{label: 'Omborxona'}, {label: 'Kirim'}]);
+
+  let currentPage = 1, editingId = null;
+
+  document.getElementById('product-filter').addEventListener('change', () => { currentPage = 1; loadData(); });
+  document.getElementById('supplier-filter').addEventListener('change', () => { currentPage = 1; loadData(); });
+  document.getElementById('start-date').addEventListener('change', () => { currentPage = 1; loadData(); });
+  document.getElementById('end-date').addEventListener('change', () => { currentPage = 1; loadData(); });
+
+  document.getElementById('si-quantity').addEventListener('input', calcTotal);
+  document.getElementById('si-price').addEventListener('input', calcTotal);
+
+  function calcTotal() {
+    const q = parseFloat(document.getElementById('si-quantity').value) || 0;
+    const p = parseFloat(document.getElementById('si-price').value) || 0;
+    document.getElementById('total-amount').textContent = Utils.formatCurrency(q * p);
+  }
+
+  async function init() {
+    document.getElementById('si-date').value = Utils.formatDateInput(new Date());
+    await Promise.all([loadFilterProducts(), loadFilterSuppliers()]);
+    loadData();
+  }
+
+  async function loadFilterProducts() {
+    try {
+      const data = await api.get('/products', { limit: 500, isActive: 'true' });
+      const sel = document.getElementById('product-filter');
+      const sel2 = document.getElementById('si-productId');
+      const opts = data.data.map(p => `<option value="${p.id}">${Utils.escapeHtml(p.code)} - ${Utils.escapeHtml(p.name)}</option>`).join('');
+      sel.innerHTML = '<option value="">Barcha mahsulotlar</option>' + opts;
+      sel2.innerHTML = '<option value="">Mahsulot tanlang</option>' + opts;
+    } catch(e) {}
+  }
+
+  async function loadFilterSuppliers() {
+    try {
+      const data = await api.get('/suppliers', { limit: 500, isActive: 'true' });
+      const sel = document.getElementById('supplier-filter');
+      const sel2 = document.getElementById('si-supplierId');
+      const opts = data.data.map(s => `<option value="${s.id}">${Utils.escapeHtml(s.companyName)}</option>`).join('');
+      sel.innerHTML = '<option value="">Barcha yetkazib beruvchilar</option>' + opts;
+      sel2.innerHTML = '<option value="">Tanlang (ixtiyoriy)</option>' + opts;
+    } catch(e) {}
+  }
+
+  async function loadData() {
+    const tbody = document.getElementById('stockin-table');
+    tbody.innerHTML = Utils.getSkeletonRows(9, 5);
+    try {
+      const params = { page: currentPage, limit: 15 };
+      const pf = document.getElementById('product-filter').value;
+      const sf = document.getElementById('supplier-filter').value;
+      const sd = document.getElementById('start-date').value;
+      const ed = document.getElementById('end-date').value;
+      if (pf) params.productId = pf;
+      if (sf) params.supplierId = sf;
+      if (sd) params.startDate = sd;
+      if (ed) params.endDate = ed;
+
+      const data = await api.get('/stock-in', params);
+      renderTable(data.data);
+      const p = data.pagination;
+      document.getElementById('total-count').textContent = `Jami: ${p.total} ta`;
+      document.getElementById('page-info').textContent = `${((p.page-1)*p.limit)+1}-${Math.min(p.page*p.limit, p.total)} / ${p.total}`;
+      const pEl = document.getElementById('pagination');
+      pEl.innerHTML = Utils.generatePaginationHTML(p);
+      Utils.setupPagination(pEl, pg => { currentPage = pg; loadData(); });
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  function renderTable(items) {
+    const tbody = document.getElementById('stockin-table');
+    if (!items.length) {
+      tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="empty-state-title">Kirim topilmadi</div></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = items.map(s => `<tr>
+      <td><span style="font-weight:500">${Utils.escapeHtml(s.product?.name || '-')}</span><br><span class="text-xs text-muted">${Utils.escapeHtml(s.product?.code || '')}</span></td>
+      <td>${Utils.formatNumber(s.quantity)} ${Utils.escapeHtml(s.product?.unit?.symbol || '')}</td>
+      <td>${Utils.formatCurrency(s.price)}</td>
+      <td><span style="font-weight:600;color:var(--success)">${Utils.formatCurrency(s.totalAmount)}</span></td>
+      <td>${Utils.escapeHtml(s.supplier?.companyName || '-')}</td>
+      <td>${Utils.escapeHtml(s.invoiceNumber || '-')}</td>
+      <td>${Utils.formatDate(s.date)}</td>
+      <td>${Utils.escapeHtml(s.user?.fullName || '-')}</td>
+      <td><div class="table-actions">
+        <button class="btn btn-secondary btn-sm btn-icon" onclick="editStockIn('${s.id}')" title="Tahrirlash">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        </button>
+        <button class="btn btn-danger btn-sm btn-icon" onclick="deleteStockIn('${s.id}')" title="O'chirish">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        </button>
+      </div></td>
+    </tr>`).join('');
+  }
+
+  function openModal(id = null) {
+    editingId = id;
+    document.getElementById('modal-title').textContent = id ? 'Kirimni tahrirlash' : 'Yangi kirim';
+    if (!id) {
+      ['si-productId','si-quantity','si-price','si-invoiceNumber','si-notes'].forEach(i => {
+        document.getElementById(i).value = '';
+      });
+      document.getElementById('si-supplierId').value = '';
+      document.getElementById('si-date').value = Utils.formatDateInput(new Date());
+      document.getElementById('total-amount').textContent = '0 UZS';
+    }
+    document.getElementById('stockin-modal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('stockin-modal').classList.remove('active');
+    editingId = null;
+  }
+
+  async function editStockIn(id) {
+    try {
+      const data = await api.get(`/stock-in/${id}`);
+      const s = data.data;
+      openModal(id);
+      document.getElementById('si-productId').value = s.productId;
+      document.getElementById('si-quantity').value = s.quantity;
+      document.getElementById('si-price').value = s.price;
+      document.getElementById('si-supplierId').value = s.supplierId || '';
+      document.getElementById('si-invoiceNumber').value = s.invoiceNumber || '';
+      document.getElementById('si-date').value = Utils.formatDateInput(s.date);
+      document.getElementById('si-notes').value = s.notes || '';
+      calcTotal();
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  async function saveStockIn() {
+    const fields = [{id:'si-productId', err:'si-productId-error'}, {id:'si-quantity', err:'si-quantity-error'}, {id:'si-price', err:'si-price-error'}];
+    let valid = true;
+    fields.forEach(f => {
+      const el = document.getElementById(f.id);
+      const err = document.getElementById(f.err);
+      if (err) err.textContent = '';
+      if (!el?.value) { if (err) err.textContent = 'Bu maydon talab qilinadi'; valid = false; }
+    });
+    if (!valid) return;
+
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saqlanmoqda...';
+
+    const body = {
+      productId: document.getElementById('si-productId').value,
+      quantity: document.getElementById('si-quantity').value,
+      price: document.getElementById('si-price').value,
+      supplierId: document.getElementById('si-supplierId').value || undefined,
+      invoiceNumber: document.getElementById('si-invoiceNumber').value.trim() || undefined,
+      date: document.getElementById('si-date').value || undefined,
+      notes: document.getElementById('si-notes').value.trim() || undefined
+    };
+
+    try {
+      if (editingId) {
+        await api.put(`/stock-in/${editingId}`, body);
+        Toast.success('Kirim yangilandi');
+      } else {
+        await api.post('/stock-in', body);
+        Toast.success('Kirim qo\'shildi');
+      }
+      closeModal();
+      loadData();
+    } catch(e) { Toast.error(e.message); }
+    finally { btn.disabled = false; btn.textContent = 'Saqlash'; }
+  }
+
+  async function deleteStockIn(id) {
+    Confirm.show('Bu kirimni o\'chirishni tasdiqlaysizmi? Ombor qoldig\'i o\'zgaradi.', 'O\'chirishni tasdiqlash', async () => {
+      try {
+        await api.delete(`/stock-in/${id}`);
+        Toast.success('Kirim o\'chirildi');
+        loadData();
+      } catch(e) { Toast.error(e.message); }
+    });
+  }
+
+  document.getElementById('stockin-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('stockin-modal')) closeModal();
+  });
+
+  init();
+</script>
+</body>
+</html>

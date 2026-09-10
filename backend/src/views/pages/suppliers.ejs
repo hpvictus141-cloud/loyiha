@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="dark">
+<head>
+  <%- include('../partials/head') %>
+</head>
+<body>
+<div class="admin-layout" id="admin-layout">
+  <%- include('../partials/sidebar') %>
+
+  <div class="main-content">
+    <%- include('../partials/navbar') %>
+
+    <main class="page-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Yetkazib Beruvchilar</h1>
+          <p class="page-subtitle">Yetkazib beruvchilar ro'yxatini boshqarish</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal()" id="add-btn">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Yangi yetkazib beruvchi
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="toolbar" style="margin:0;flex:1">
+            <div class="toolbar-left">
+              <div class="search-bar">
+                <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" id="search-input" class="form-control" placeholder="Korxona, mas'ul shaxs, telefon..." style="width:300px">
+              </div>
+              <select id="status-filter" class="form-control" style="width:150px">
+                <option value="">Barcha holat</option>
+                <option value="true">Faol</option>
+                <option value="false">Faol emas</option>
+              </select>
+            </div>
+            <div class="toolbar-right">
+              <span id="total-count" class="text-sm text-muted"></span>
+            </div>
+          </div>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Korxona</th>
+                <th>Mas'ul shaxs</th>
+                <th>Telefon</th>
+                <th>Email</th>
+                <th>STIR</th>
+                <th>Kirimlar</th>
+                <th>Holat</th>
+                <th style="width:100px">Amallar</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+        <div class="card-footer" style="display:flex;align-items:center;justify-content:space-between">
+          <span id="page-info" class="text-sm text-muted"></span>
+          <div id="pagination"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Yetkazib beruvchi modal -->
+<div class="modal-overlay" id="supplier-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="modal-title">Yangi yetkazib beruvchi</h3>
+      <button class="modal-close" onclick="closeModal()">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <form id="supplier-form" novalidate>
+        <div class="grid grid-2" style="gap:16px">
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Korxona nomi <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="companyName" class="form-control" placeholder="Masalan: Turkiston Food MChJ">
+            <span id="companyName-error" class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mas'ul shaxs <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="contactPerson" class="form-control" placeholder="Ism familiya">
+            <span id="contactPerson-error" class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Telefon <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="phone" class="form-control" placeholder="+998 XX XXX XX XX">
+            <span id="phone-error" class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" id="email" class="form-control" placeholder="info@korxona.uz">
+            <span id="email-error" class="form-error"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">STIR (INN)</label>
+            <input type="text" id="taxId" class="form-control" placeholder="123456789">
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Manzil</label>
+            <input type="text" id="address" class="form-control" placeholder="Shahar, ko'cha, uy">
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label class="form-label">Izoh</label>
+            <textarea id="description" class="form-control" rows="2" placeholder="Qo'shimcha ma'lumot..."></textarea>
+          </div>
+          <div class="form-group" style="grid-column:1/-1" id="active-row" hidden>
+            <label class="form-label">Holat</label>
+            <select id="isActive" class="form-control">
+              <option value="true">Faol</option>
+              <option value="false">Faol emas</option>
+            </select>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Bekor qilish</button>
+      <button class="btn btn-primary" id="save-btn" onclick="save()">Saqlash</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<%- include('../partials/scripts') %>
+
+<script>
+  if (!Layout.init()) throw new Error('Auth failed');
+  Layout.setBreadcrumb([{label: 'Ma\'lumotlar'}, {label: 'Yetkazib Beruvchilar'}]);
+
+  let currentPage = 1;
+  let editingId = null;
+
+  const user = Auth.getUser();
+  const canManage = Auth.hasPermission('suppliers:create') || user?.role?.name === 'Admin';
+
+  if (!canManage) document.getElementById('add-btn').style.display = 'none';
+
+  const searchInput = document.getElementById('search-input');
+  const statusFilter = document.getElementById('status-filter');
+
+  searchInput.addEventListener('input', Utils.debounce(() => { currentPage = 1; load(); }, 400));
+  statusFilter.addEventListener('change', () => { currentPage = 1; load(); });
+
+  async function load() {
+    const tbody = document.getElementById('table-body');
+    tbody.innerHTML = Utils.getSkeletonRows(8, 5);
+    try {
+      const params = { page: currentPage, limit: 15 };
+      const s = searchInput.value.trim();
+      if (s) params.search = s;
+      if (statusFilter.value) params.isActive = statusFilter.value;
+
+      const data = await api.get('/suppliers', params);
+      renderTable(data.data);
+
+      const p = data.pagination;
+      document.getElementById('total-count').textContent = `Jami: ${p.total} ta`;
+      document.getElementById('page-info').textContent = p.total
+        ? `${((p.page - 1) * p.limit) + 1}-${Math.min(p.page * p.limit, p.total)} / ${p.total}`
+        : '';
+
+      const paginationEl = document.getElementById('pagination');
+      paginationEl.innerHTML = Utils.generatePaginationHTML(p);
+      Utils.setupPagination(paginationEl, (pg) => { currentPage = pg; load(); });
+    } catch (e) {
+      Toast.error(e.message);
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--danger)">${Utils.escapeHtml(e.message)}</td></tr>`;
+    }
+  }
+
+  function renderTable(rows) {
+    const tbody = document.getElementById('table-body');
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-state-title">Yetkazib beruvchi topilmadi</div><p class="empty-state-description">Yangi qo'shish uchun yuqoridagi tugmani bosing</p></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(r => {
+      const count = r._count?.stockIns ?? 0;
+      return `
+      <tr>
+        <td>
+          <span style="font-weight:500">${Utils.escapeHtml(r.companyName)}</span>
+          ${r.address ? `<br><span class="text-xs text-muted">${Utils.escapeHtml(Utils.truncate(r.address, 34))}</span>` : ''}
+        </td>
+        <td>${Utils.escapeHtml(r.contactPerson)}</td>
+        <td class="text-sm">${Utils.escapeHtml(r.phone)}</td>
+        <td class="text-sm">${Utils.escapeHtml(r.email || '-')}</td>
+        <td class="text-sm">${Utils.escapeHtml(r.taxId || '-')}</td>
+        <td><span class="badge badge-info">${Utils.formatNumber(count)}</span></td>
+        <td><span class="badge ${r.isActive ? 'badge-success' : 'badge-secondary'}">${r.isActive ? 'Faol' : 'Faol emas'}</span></td>
+        <td>
+          ${canManage ? `
+          <div class="table-actions">
+            <button class="btn btn-secondary btn-sm btn-icon" onclick="edit('${r.id}')" title="Tahrirlash">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            </button>
+            <button class="btn btn-danger btn-sm btn-icon" onclick="remove('${r.id}', ${JSON.stringify(r.companyName).replace(/"/g, '&quot;')}, ${count})" title="O'chirish">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </div>` : '<span class="text-muted text-sm">-</span>'}
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  /* ---------- Modal ---------- */
+
+  function openModal(id = null) {
+    editingId = id;
+    document.getElementById('modal-title').textContent = id ? 'Yetkazib beruvchini tahrirlash' : 'Yangi yetkazib beruvchi';
+    clearForm();
+    Utils.clearFormErrors('supplier-modal');
+    document.getElementById('active-row').hidden = !id;
+    document.getElementById('supplier-modal').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('supplier-modal').classList.remove('active');
+    editingId = null;
+    clearForm();
+    Utils.clearFormErrors('supplier-modal');
+  }
+
+  function clearForm() {
+    ['companyName', 'contactPerson', 'phone', 'email', 'taxId', 'address', 'description'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    ['companyName', 'contactPerson', 'phone', 'email'].forEach(id => {
+      const el = document.getElementById(id + '-error');
+      if (el) el.textContent = '';
+    });
+    document.getElementById('isActive').value = 'true';
+    Utils.clearFormErrors('supplier-modal');
+  }
+
+  async function edit(id) {
+    try {
+      const data = await api.get(`/suppliers/${id}`);
+      const r = data.data;
+      openModal(id);
+      document.getElementById('companyName').value = r.companyName;
+      document.getElementById('contactPerson').value = r.contactPerson;
+      document.getElementById('phone').value = r.phone;
+      document.getElementById('email').value = r.email || '';
+      document.getElementById('taxId').value = r.taxId || '';
+      document.getElementById('address').value = r.address || '';
+      document.getElementById('description').value = r.description || '';
+      document.getElementById('isActive').value = String(r.isActive);
+    } catch (e) {
+      Utils.handleApiError(e);
+    }
+  }
+
+  async function save() {
+    Utils.clearFormErrors('supplier-modal');
+    let valid = true;
+    const setErr = (id, msg) => {
+      const el = document.getElementById(id + '-error');
+      const inputEl = document.getElementById(id);
+      if (el) el.textContent = msg || '';
+      if (msg) {
+        valid = false;
+        if (inputEl) inputEl.classList.add('is-invalid');
+      }
+    };
+
+    ['companyName', 'contactPerson', 'phone', 'email'].forEach(id => setErr(id, ''));
+
+    const companyName = document.getElementById('companyName').value.trim();
+    const contactPerson = document.getElementById('contactPerson').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const email = document.getElementById('email').value.trim();
+
+    if (!companyName) setErr('companyName', 'Korxona nomini kiriting');
+    if (!contactPerson) setErr('contactPerson', 'Mas\'ul shaxsni kiriting');
+    if (!phone) setErr('phone', 'Telefon raqamini kiriting');
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) setErr('email', 'Email formati noto\'g\'ri');
+    if (!valid) return;
+
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saqlanmoqda...';
+
+    const body = {
+      companyName,
+      contactPerson,
+      phone,
+      email: email || null,
+      taxId: document.getElementById('taxId').value.trim() || null,
+      address: document.getElementById('address').value.trim() || null,
+      description: document.getElementById('description').value.trim() || null
+    };
+    if (editingId) body.isActive = document.getElementById('isActive').value === 'true';
+
+    try {
+      if (editingId) {
+        await api.put(`/suppliers/${editingId}`, body);
+        Toast.success('Yetkazib beruvchi yangilandi');
+      } else {
+        await api.post('/suppliers', body);
+        Toast.success('Yetkazib beruvchi qo\'shildi');
+      }
+      closeModal();
+      load();
+    } catch (e) {
+      Utils.handleApiError(e, 'supplier-modal');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Saqlash';
+    }
+  }
+
+  async function remove(id, name, stockInCount) {
+    Confirm.show(
+      `"${name}" yetkazib beruvchisini o'chirishni tasdiqlaysizmi?`,
+      'O\'chirishni tasdiqlash',
+      async () => {
+        try {
+          await api.delete(`/suppliers/${id}`);
+          Toast.success('Yetkazib beruvchi o\'chirildi');
+          load();
+        } catch (e) {
+          Utils.handleApiError(e);
+        }
+      }
+    );
+  }
+
+  document.getElementById('supplier-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('supplier-modal')) closeModal();
+  });
+
+  Utils.setupPhoneInput('phone');
+  load();
+</script>
+</body>
+</html>

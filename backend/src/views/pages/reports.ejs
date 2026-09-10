@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="dark">
+<head>
+  <%- include('../partials/head') %>
+  <style>
+    .tabs {
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      background: rgba(148, 163, 184, 0.08);
+      border: 1px solid rgba(59, 130, 246, 0.15);
+      border-radius: var(--radius-md);
+      width: fit-content;
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      padding: 9px 18px;
+      border-radius: var(--radius);
+      background: none;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .tab-btn:hover { color: var(--text-primary); }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: #e2e8f0;
+    }
+    @media print {
+      .sidebar, .navbar, .tabs, .toolbar, .page-header button { display: none !important; }
+      .main-content { margin-left: 0 !important; }
+      .admin-layout { background: #fff !important; }
+    }
+  </style>
+</head>
+<body>
+<div class="admin-layout" id="admin-layout">
+  <%- include('../partials/sidebar') %>
+
+  <div class="main-content">
+    <%- include('../partials/navbar') %>
+
+    <main class="page-content">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Hisobotlar</h1>
+          <p class="page-subtitle">Ombor tahlili va harakatlar hisoboti</p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-secondary" onclick="exportCsv()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            CSV yuklab olish
+          </button>
+          <button class="btn btn-primary" onclick="window.print()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+            Chop etish
+          </button>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" id="tab-stock" onclick="switchTab('stock')">Ombor qoldig'i</button>
+        <button class="tab-btn" id="tab-moves" onclick="switchTab('moves')">Harakatlar tahlili</button>
+      </div>
+
+      <!-- ============ OMBOR QOLDIG'I ============ -->
+      <section id="view-stock">
+        <div class="stats-cards">
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(59,130,246,0.15)">
+              <svg width="28" height="28" fill="none" stroke="#3b82f6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            </div>
+            <div class="stat-card-body">
+              <div class="stat-card-label">Faol mahsulotlar</div>
+              <div class="stat-card-value" id="s-products">-</div>
+              <div class="stat-card-meta" id="s-categories">-</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(59,130,246,0.15)">
+              <svg width="28" height="28" fill="none" stroke="#3b82f6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div class="stat-card-body">
+              <div class="stat-card-label">Ombor qiymati (tannarx)</div>
+              <div class="stat-card-value" id="s-cost" style="font-size:22px">-</div>
+              <div class="stat-card-meta">Qoldiq × sotib olish narxi</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(59,130,246,0.15)">
+              <svg width="28" height="28" fill="none" stroke="#3b82f6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+            </div>
+            <div class="stat-card-body">
+              <div class="stat-card-label">Kutilayotgan tushum</div>
+              <div class="stat-card-value" id="s-revenue" style="font-size:22px">-</div>
+              <div class="stat-card-meta" id="s-margin">-</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(59,130,246,0.15)">
+              <svg width="28" height="28" fill="none" stroke="#3b82f6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <div class="stat-card-body">
+              <div class="stat-card-label">Kam qolgan</div>
+              <div class="stat-card-value" id="s-low">-</div>
+              <div class="stat-card-meta">Minimal darajadan past</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="toolbar" style="margin:0;flex:1">
+              <div class="toolbar-left">
+                <div class="search-bar">
+                  <svg class="search-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                  <input type="text" id="stock-search" class="form-control" placeholder="Mahsulot nomi yoki kodi..." style="width:260px">
+                </div>
+                <select id="stock-category" class="form-control" style="width:190px">
+                  <option value="">Barcha kategoriyalar</option>
+                </select>
+                <select id="stock-only-low" class="form-control" style="width:170px">
+                  <option value="">Barcha mahsulotlar</option>
+                  <option value="low">Faqat kam qolganlar</option>
+                  <option value="zero">Faqat tugaganlar</option>
+                </select>
+              </div>
+              <div class="toolbar-right">
+                <span id="stock-count" class="text-sm text-muted"></span>
+              </div>
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th class="col-code">Kod</th>
+                  <th>Mahsulot</th>
+                  <th>Kategoriya</th>
+                  <th>Qoldiq</th>
+                  <th>Minimal</th>
+                  <th>Tannarx qiymati</th>
+                  <th>Sotuv qiymati</th>
+                  <th>Holat</th>
+                </tr>
+              </thead>
+              <tbody id="stock-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ HARAKATLAR ============ -->
+      <section id="view-moves" hidden>
+        <div class="stats-cards" style="grid-template-columns:repeat(3,1fr)">
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(59,130,246,0.15)">
+              <svg width="28" height="28" fill="none" stroke="#3b82f6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+            </div>
+            <div class="stat-card-body">
+              <div class="stat-card-label">Harakatlar soni</div>
+              <div class="stat-card-value" id="m-count">-</div>
+              <div class="stat-card-meta">Tanlangan davr uchun</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(59,130,246,0.15)">
+              <svg width="28" height="28" fill="none" stroke="#3b82f6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            </div>
+            <div class="stat-card-body">
+              <div class="stat-card-label">Jami kirim</div>
+              <div class="stat-card-value" id="m-in" style="color:var(--success)">-</div>
+              <div class="stat-card-meta">Omborga qo'shilgan</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon" style="background:rgba(59,130,246,0.15)">
+              <svg width="28" height="28" fill="none" stroke="#3b82f6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
+            </div>
+            <div class="stat-card-body">
+              <div class="stat-card-label">Jami chiqim</div>
+              <div class="stat-card-value" id="m-out" style="color:var(--warning)">-</div>
+              <div class="stat-card-meta">Ombordan chiqarilgan</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="toolbar" style="margin:0;flex:1">
+              <div class="toolbar-left">
+                <select id="move-product" class="form-control" style="width:220px">
+                  <option value="">Barcha mahsulotlar</option>
+                </select>
+                <input type="date" id="move-start" class="form-control" style="width:160px" title="Boshlanish sanasi">
+                <input type="date" id="move-end" class="form-control" style="width:160px" title="Tugash sanasi">
+                <button class="btn btn-primary btn-sm" onclick="loadMoves()">Hisobotni ko'rish</button>
+                <button class="btn btn-secondary btn-sm" onclick="resetMoveFilters()">Tozalash</button>
+              </div>
+              <div class="toolbar-right">
+                <span id="move-count" class="text-sm text-muted"></span>
+              </div>
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Sana</th>
+                  <th>Mahsulot</th>
+                  <th>Amal</th>
+                  <th>Oldin</th>
+                  <th>O'zgarish</th>
+                  <th>Keyin</th>
+                  <th>Izoh</th>
+                </tr>
+              </thead>
+              <tbody id="moves-table"></tbody>
+            </table>
+          </div>
+          <div class="card-footer" style="display:flex;align-items:center;justify-content:space-between">
+            <span id="move-page-info" class="text-sm text-muted"></span>
+            <div id="move-pagination"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+
+<%- include('../partials/scripts') %>
+
+<script>
+  if (!Layout.init()) throw new Error('Auth failed');
+  Layout.setBreadcrumb([{label: 'Tahlil'}, {label: 'Hisobotlar'}]);
+
+  let activeTab = 'stock';
+  let stockRows = [];      // /reports/stock-summary dan kelgan to'liq ro'yxat
+  let filteredStock = [];
+  let moveRows = [];       // filtrlangan harakatlar (to'liq)
+  let movePage = 1;
+  const MOVE_PAGE_SIZE = 20;
+
+  /* ---------- Tab ---------- */
+
+  function switchTab(tab) {
+    activeTab = tab;
+    document.getElementById('tab-stock').classList.toggle('active', tab === 'stock');
+    document.getElementById('tab-moves').classList.toggle('active', tab === 'moves');
+    document.getElementById('view-stock').hidden = tab !== 'stock';
+    document.getElementById('view-moves').hidden = tab !== 'moves';
+    if (tab === 'moves' && !moveRows.length) loadMoves();
+  }
+
+  /* ---------- Ombor qoldig'i ---------- */
+
+  const stockSearch = document.getElementById('stock-search');
+  const stockCategory = document.getElementById('stock-category');
+  const stockOnlyLow = document.getElementById('stock-only-low');
+
+  stockSearch.addEventListener('input', Utils.debounce(applyStockFilters, 300));
+  stockCategory.addEventListener('change', applyStockFilters);
+  stockOnlyLow.addEventListener('change', applyStockFilters);
+
+  async function loadStock() {
+    const tbody = document.getElementById('stock-table');
+    tbody.innerHTML = Utils.getSkeletonRows(8, 6);
+    try {
+      const data = await api.get('/reports/stock-summary');
+      stockRows = data.data;
+
+      const cats = [...new Map(stockRows.filter(p => p.category).map(p => [p.category.id, p.category])).values()]
+        .sort((a, b) => a.name.localeCompare(b.name));
+      stockCategory.innerHTML = '<option value="">Barcha kategoriyalar</option>' +
+        cats.map(c => `<option value="${c.id}">${Utils.escapeHtml(c.name)}</option>`).join('');
+
+      applyStockFilters();
+    } catch (e) {
+      Toast.error(e.message);
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--danger)">${Utils.escapeHtml(e.message)}</td></tr>`;
+    }
+  }
+
+  function applyStockFilters() {
+    const q = stockSearch.value.trim().toLowerCase();
+    const cat = stockCategory.value;
+    const mode = stockOnlyLow.value;
+
+    filteredStock = stockRows.filter(p => {
+      if (cat && p.categoryId !== cat) return false;
+      if (q && !(p.name.toLowerCase().includes(q) || (p.code || '').toLowerCase().includes(q))) return false;
+
+      const stock = parseFloat(p.currentStock);
+      if (mode === 'low' && !(stock <= parseFloat(p.minStock))) return false;
+      if (mode === 'zero' && stock > 0) return false;
+      return true;
+    });
+
+    renderStockStats();
+    renderStockTable();
+  }
+
+  function renderStockStats() {
+    const cost = filteredStock.reduce((s, p) => s + parseFloat(p.currentStock) * parseFloat(p.purchasePrice), 0);
+    const revenue = filteredStock.reduce((s, p) => s + parseFloat(p.currentStock) * parseFloat(p.salePrice), 0);
+    const low = filteredStock.filter(p => parseFloat(p.currentStock) <= parseFloat(p.minStock)).length;
+    const cats = new Set(filteredStock.map(p => p.categoryId));
+
+    document.getElementById('s-products').textContent = Utils.formatNumber(filteredStock.length);
+    document.getElementById('s-categories').textContent = `${cats.size} ta kategoriya`;
+    document.getElementById('s-cost').textContent = Utils.formatCurrency(cost);
+    document.getElementById('s-revenue').textContent = Utils.formatCurrency(revenue);
+    document.getElementById('s-margin').textContent = cost > 0
+      ? `Foyda: ${Utils.formatCurrency(revenue - cost)}`
+      : 'Foyda: -';
+    document.getElementById('s-low').textContent = Utils.formatNumber(low);
+    document.getElementById('stock-count').textContent = `Ko'rsatilmoqda: ${filteredStock.length} / ${stockRows.length}`;
+  }
+
+  function renderStockTable() {
+    const tbody = document.getElementById('stock-table');
+    if (!filteredStock.length) {
+      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-state-title">Mahsulot topilmadi</div><p class="empty-state-description">Filtr shartlariga mos mahsulot yo'q</p></div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = filteredStock.map(p => {
+      const stock = parseFloat(p.currentStock);
+      const min = parseFloat(p.minStock);
+      const sym = p.unit?.symbol || '';
+      let badge = '<span class="badge badge-success">Yetarli</span>';
+      if (stock <= 0) badge = '<span class="badge badge-danger">Tugagan</span>';
+      else if (stock <= min) badge = '<span class="badge badge-warning">Kam</span>';
+
+      return `<tr>
+        <td class="col-code"><span class="badge-code">${Utils.escapeHtml(p.code)}</span></td>
+        <td><span style="font-weight:500">${Utils.escapeHtml(p.name)}</span></td>
+        <td>${Utils.escapeHtml(p.category?.name || '-')}</td>
+        <td><span style="font-weight:600">${Utils.formatNumber(stock, 2)}</span> ${Utils.escapeHtml(sym)}</td>
+        <td class="text-muted">${Utils.formatNumber(min, 2)} ${Utils.escapeHtml(sym)}</td>
+        <td>${Utils.formatCurrency(stock * parseFloat(p.purchasePrice))}</td>
+        <td>${Utils.formatCurrency(stock * parseFloat(p.salePrice))}</td>
+        <td>${badge}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  /* ---------- Harakatlar ---------- */
+
+  const moveProduct = document.getElementById('move-product');
+  const moveStart = document.getElementById('move-start');
+  const moveEnd = document.getElementById('move-end');
+
+  moveStart.addEventListener('change', () => {
+    const today = Utils.getTodayString();
+    if (moveStart.value && moveStart.value > today) {
+      Toast.warning('Sana bugungi kundan katta bo\'lishi mumkin emas');
+      moveStart.value = today;
+    }
+  });
+
+  moveEnd.addEventListener('change', () => {
+    const today = Utils.getTodayString();
+    if (moveEnd.value && moveEnd.value > today) {
+      Toast.warning('Sana bugungi kundan katta bo\'lishi mumkin emas');
+      moveEnd.value = today;
+    }
+  });
+
+  function resetMoveFilters() {
+    moveProduct.value = '';
+    moveStart.value = '';
+    moveEnd.value = '';
+    loadMoves();
+  }
+
+  async function loadMoves() {
+    const tbody = document.getElementById('moves-table');
+    tbody.innerHTML = Utils.getSkeletonRows(7, 6);
+    try {
+      const today = Utils.getTodayString();
+      if (moveStart.value && moveStart.value > today) {
+        Toast.warning('Sana bugungi kundan katta bo\'lishi mumkin emas');
+        moveStart.value = today;
+        return;
+      }
+      if (moveEnd.value && moveEnd.value > today) {
+        Toast.warning('Sana bugungi kundan katta bo\'lishi mumkin emas');
+        moveEnd.value = today;
+        return;
+      }
+      if (moveStart.value && moveEnd.value && moveStart.value > moveEnd.value) {
+        Toast.warning('Boshlanish sanasi tugash sanasidan katta bo\'lishi mumkin emas');
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--warning)">Boshlanish sanasi tugash sanasidan katta bo\'lishi mumkin emas</td></tr>';
+        return;
+      }
+
+      const params = {};
+      if (moveProduct.value) params.productId = moveProduct.value;
+      if (moveStart.value) params.startDate = moveStart.value;
+      if (moveEnd.value) params.endDate = moveEnd.value + 'T23:59:59';
+
+      const data = await api.get('/reports/stock-movements', params);
+      moveRows = data.data;
+      movePage = 1;
+      renderMoveStats();
+      renderMoves();
+    } catch (e) {
+      Toast.error(e.message);
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--danger)">${Utils.escapeHtml(e.message)}</td></tr>`;
+    }
+  }
+
+  function renderMoveStats() {
+    let inSum = 0, outSum = 0;
+    moveRows.forEach(r => {
+      const change = parseFloat(r.quantityChange);
+      if (change >= 0) inSum += change; else outSum += Math.abs(change);
+    });
+    document.getElementById('m-count').textContent = Utils.formatNumber(moveRows.length);
+    document.getElementById('m-in').textContent = '+' + Utils.formatNumber(inSum, inSum % 1 ? 2 : 0);
+    document.getElementById('m-out').textContent = '-' + Utils.formatNumber(outSum, outSum % 1 ? 2 : 0);
+    document.getElementById('move-count').textContent = `Jami: ${moveRows.length} ta`;
+  }
+
+  function actionBadge(type) {
+    const map = {
+      KIRIM: ['badge-success', 'Kirim'],
+      CHIQIM: ['badge-warning', 'Chiqim'],
+      KIRIM_TUZATISH: ['badge-info', 'Kirim tuzatildi'],
+      CHIQIM_TUZATISH: ['badge-info', 'Chiqim tuzatildi'],
+      KIRIM_BEKOR: ['badge-danger', 'Kirim bekor'],
+      CHIQIM_BEKOR: ['badge-danger', 'Chiqim bekor']
+    };
+    const [cls, label] = map[type] || ['badge-secondary', type];
+    return `<span class="badge ${cls}">${Utils.escapeHtml(label)}</span>`;
+  }
+
+  function renderMoves() {
+    const tbody = document.getElementById('moves-table');
+    if (!moveRows.length) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state-title">Harakat topilmadi</div><p class="empty-state-description">Tanlangan davr uchun ombor harakatlari yo'q</p></div></td></tr>`;
+      document.getElementById('move-pagination').innerHTML = '';
+      document.getElementById('move-page-info').textContent = '';
+      return;
+    }
+
+    const pages = Math.ceil(moveRows.length / MOVE_PAGE_SIZE);
+    const slice = moveRows.slice((movePage - 1) * MOVE_PAGE_SIZE, movePage * MOVE_PAGE_SIZE);
+
+    tbody.innerHTML = slice.map(r => {
+      const change = parseFloat(r.quantityChange);
+      const sym = r.product?.unit?.symbol || '';
+      return `<tr>
+        <td class="text-sm">${Utils.formatDate(r.createdAt, 'DD.MM.YYYY HH:mm')}</td>
+        <td><span style="font-weight:500">${Utils.escapeHtml(r.product?.name || '-')}</span></td>
+        <td>${actionBadge(r.actionType)}</td>
+        <td class="text-muted">${Utils.formatNumber(r.quantityBefore, 2)}</td>
+        <td><span style="font-weight:600;color:${change >= 0 ? 'var(--success)' : 'var(--warning)'}">${change >= 0 ? '+' : ''}${Utils.formatNumber(change, 2)}</span> ${Utils.escapeHtml(sym)}</td>
+        <td><span style="font-weight:600">${Utils.formatNumber(r.quantityAfter, 2)}</span></td>
+        <td class="text-sm text-muted">${Utils.escapeHtml(Utils.truncate(r.notes, 30))}</td>
+      </tr>`;
+    }).join('');
+
+    const paginationEl = document.getElementById('move-pagination');
+    paginationEl.innerHTML = Utils.generatePaginationHTML({ page: movePage, pages });
+    Utils.setupPagination(paginationEl, (pg) => { movePage = pg; renderMoves(); });
+
+    document.getElementById('move-page-info').textContent =
+      `${((movePage - 1) * MOVE_PAGE_SIZE) + 1}-${Math.min(movePage * MOVE_PAGE_SIZE, moveRows.length)} / ${moveRows.length}`;
+  }
+
+  /* ---------- CSV eksport ---------- */
+
+  function toCsv(headers, rows) {
+    const esc = (v) => {
+      const s = String(v ?? '');
+      return /[";\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
+    return [headers, ...rows].map(r => r.map(esc).join(';')).join('\r\n');
+  }
+
+  function download(filename, csv) {
+    // BOM - Excel kirill/lotin harflarni to'g'ri o'qishi uchun
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function exportCsv() {
+    const stamp = Utils.formatDateInput(new Date());
+
+    if (activeTab === 'stock') {
+      if (!filteredStock.length) return Toast.warning('Eksport qilish uchun ma\'lumot yo\'q');
+      const rows = filteredStock.map(p => {
+        const stock = parseFloat(p.currentStock);
+        return [
+          p.code, p.name, p.category?.name || '', p.unit?.symbol || '',
+          stock, parseFloat(p.minStock),
+          parseFloat(p.purchasePrice), parseFloat(p.salePrice),
+          stock * parseFloat(p.purchasePrice), stock * parseFloat(p.salePrice)
+        ];
+      });
+      download(`ombor-qoldigi-${stamp}.csv`, toCsv(
+        ['Kod', 'Mahsulot', 'Kategoriya', 'Olchov', 'Qoldiq', 'Minimal', 'Tannarx', 'Sotuv narxi', 'Tannarx qiymati', 'Sotuv qiymati'],
+        rows
+      ));
+      Toast.success(`${rows.length} ta qator yuklab olindi`);
+    } else {
+      if (!moveRows.length) return Toast.warning('Eksport qilish uchun ma\'lumot yo\'q');
+      const rows = moveRows.map(r => [
+        Utils.formatDate(r.createdAt, 'DD.MM.YYYY HH:mm'),
+        r.product?.name || '', r.actionType,
+        parseFloat(r.quantityBefore), parseFloat(r.quantityChange), parseFloat(r.quantityAfter),
+        r.product?.unit?.symbol || '', r.notes || ''
+      ]);
+      download(`ombor-harakatlari-${stamp}.csv`, toCsv(
+        ['Sana', 'Mahsulot', 'Amal', 'Oldin', 'Ozgarish', 'Keyin', 'Olchov', 'Izoh'],
+        rows
+      ));
+      Toast.success(`${rows.length} ta qator yuklab olindi`);
+    }
+  }
+
+  /* ---------- Init ---------- */
+
+  async function init() {
+    const today = Utils.getTodayString();
+    moveStart.max = today;
+    moveEnd.max = today;
+    await loadStock();
+    // Harakatlar filtri uchun mahsulot ro'yxati - qoldiq hisobotidan qayta ishlatamiz
+    moveProduct.innerHTML = '<option value="">Barcha mahsulotlar</option>' +
+      stockRows.map(p => `<option value="${p.id}">${Utils.escapeHtml(p.code)} — ${Utils.escapeHtml(p.name)}</option>`).join('');
+  }
+
+  init();
+</script>
+</body>
+</html>

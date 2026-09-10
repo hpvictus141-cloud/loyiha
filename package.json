@@ -1,0 +1,35 @@
+{
+  "name": "omborxona-full-stack",
+  "version": "1.0.0",
+  "description": "To'liq Node.js Full-Stack Omborxona Boshqaruv Tizimi",
+  "type": "module",
+  "scripts": {
+    "start": "npm run start --prefix backend",
+    "dev": "npm run dev --prefix backend",
+    "backend": "npm run dev --prefix backend",
+    "migrate": "npm run migrate --prefix backend",
+    "seed": "npm run seed --prefix backend",
+    "studio": "npm run studio --prefix backend",
+    "setup": "npm install --prefix backend && npm run generate --prefix backend",
+    "build": "npm run generate --prefix backend",
+    "vercel-build": "npm run generate --prefix backend",
+    "postinstall": "cd backend && npm install"
+  },
+  "workspaces": [
+    "backend"
+  ],
+  "keywords": [
+    "warehouse",
+    "inventory",
+    "management",
+    "nodejs",
+    "express",
+    "prisma"
+  ],
+  "author": "",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

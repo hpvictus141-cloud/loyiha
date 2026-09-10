@@ -1,0 +1,247 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x", "rhel-openssl-3.0.x", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id              String    @id @default(uuid())
+  username        String    @unique
+  email           String    @unique
+  password        String
+  fullName        String
+  phone           String?
+  profileImage    String?
+  roleId          String
+  role            Role      @relation(fields: [roleId], references: [id])
+  isActive        Boolean   @default(true)
+  lastLogin       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  sessions        Session[]
+  auditLogs       AuditLog[]
+  stockIns        StockIn[]
+  stockOuts       StockOut[]
+  
+  @@index([username])
+  @@index([email])
+  @@index([roleId])
+}
+
+model Role {
+  id              String       @id @default(uuid())
+  name            String       @unique
+  description     String?
+  permissions     Permission[]
+  users           User[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+}
+
+model Permission {
+  id              String   @id @default(uuid())
+  module          String
+  action          String
+  description     String?
+  roles           Role[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([module, action])
+}
+
+model Session {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshToken    String   @unique
+  ipAddress       String?
+  userAgent       String?
+  expiresAt       DateTime
+  createdAt       DateTime @default(now())
+  
+  @@index([userId])
+  @@index([refreshToken])
+}
+
+model Category {
+  id              String    @id @default(uuid())
+  name            String    @unique
+  description     String?
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  products        Product[]
+  
+  @@index([name])
+}
+
+model Unit {
+  id              String    @id @default(uuid())
+  name            String    @unique
+  symbol          String    @unique
+  description     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  products        Product[]
+}
+
+model Product {
+  id              String    @id @default(uuid())
+  code            String    @unique
+  name            String
+  categoryId      String
+  category        Category  @relation(fields: [categoryId], references: [id])
+  unitId          String
+  unit            Unit      @relation(fields: [unitId], references: [id])
+  purchasePrice   Decimal   @db.Decimal(15, 2)
+  salePrice       Decimal   @db.Decimal(15, 2)
+  minStock        Decimal   @default(0) @db.Decimal(15, 2)
+  currentStock    Decimal   @default(0) @db.Decimal(15, 2)
+  description     String?
+  barcode         String?   @unique
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  stockIns        StockIn[]
+  stockOuts       StockOut[]
+  inventoryLogs   InventoryLog[]
+  
+  @@index([code])
+  @@index([name])
+  @@index([categoryId])
+  @@index([barcode])
+}
+
+model Supplier {
+  id              String    @id @default(uuid())
+  companyName     String
+  contactPerson   String
+  phone           String
+  email           String?
+  address         String?
+  taxId           String?   @unique
+  description     String?
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  stockIns        StockIn[]
+  
+  @@index([companyName])
+  @@index([taxId])
+}
+
+model StockIn {
+  id              String    @id @default(uuid())
+  productId       String
+  product         Product   @relation(fields: [productId], references: [id])
+  supplierId      String?
+  supplier        Supplier? @relation(fields: [supplierId], references: [id])
+  quantity        Decimal   @db.Decimal(15, 2)
+  price           Decimal   @db.Decimal(15, 2)
+  totalAmount     Decimal   @db.Decimal(15, 2)
+  date            DateTime  @default(now())
+  invoiceNumber   String?
+  notes           String?
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@index([productId])
+  @@index([supplierId])
+  @@index([date])
+  @@index([userId])
+}
+
+model StockOut {
+  id              String    @id @default(uuid())
+  productId       String
+  product         Product   @relation(fields: [productId], references: [id])
+  quantity        Decimal   @db.Decimal(15, 2)
+  recipientName   String
+  recipientPhone  String?
+  date            DateTime  @default(now())
+  notes           String?
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@index([productId])
+  @@index([date])
+  @@index([userId])
+}
+
+model InventoryLog {
+  id              String    @id @default(uuid())
+  productId       String
+  product         Product   @relation(fields: [productId], references: [id])
+  actionType      String
+  quantityBefore  Decimal   @db.Decimal(15, 2)
+  quantityChange  Decimal   @db.Decimal(15, 2)
+  quantityAfter   Decimal   @db.Decimal(15, 2)
+  referenceId     String?
+  referenceType   String?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  
+  @@index([productId])
+  @@index([actionType])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  action          String
+  module          String
+  details         String?
+  ipAddress       String?
+  userAgent       String?
+  createdAt       DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([module])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model CompanySettings {
+  id              String    @id @default(uuid())
+  companyName     String
+  logo            String?
+  phone           String?
+  email           String?
+  address         String?
+  taxId           String?
+  currency        String    @default("so'm")
+  dateFormat      String    @default("DD.MM.YYYY")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Notification {
+  id              String    @id @default(uuid())
+  title           String
+  message         String
+  type            String
+  isRead          Boolean   @default(false)
+  userId          String?
+  createdAt       DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
