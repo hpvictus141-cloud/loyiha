@@ -281,11 +281,30 @@ const Layout = {
 
   setBreadcrumb(items) {
     const bc = document.getElementById('breadcrumb');
-    if (!bc) return;
-    bc.innerHTML = items.map((item, i) => `
-      ${i > 0 ? '<svg class="breadcrumb-sep" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>' : ''}
-      <span class="breadcrumb-item">${item.label}</span>
-    `).join('');
+    if (!bc || !Array.isArray(items)) return;
+    bc.innerHTML = items.map((rawItem, i) => {
+      const item = typeof rawItem === 'string' ? { label: rawItem } : rawItem;
+      const isLast = i === items.length - 1;
+      const sep = i > 0 
+        ? '<svg class="breadcrumb-sep" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>' 
+        : '';
+      const label = (window.Utils && typeof window.Utils.escapeHtml === 'function')
+        ? window.Utils.escapeHtml(item.label || '')
+        : (item.label || '');
+
+      if (isLast) {
+        // Oxirgi element — joriy sahifa nomi (aktiv, qalin, link emas)
+        return `${sep}<span class="breadcrumb-item breadcrumb-current active" aria-current="page">${label}</span>`;
+      }
+
+      if (item.href) {
+        // Faqat haqiqiy sahifa linki bo'lsagina <a> qilib chiziladi
+        return `${sep}<a href="${item.href}" class="breadcrumb-item breadcrumb-link">${label}</a>`;
+      }
+
+      // Guruh nomi (masalan "Boshqaruv", "Omborxona", "Ma'lumotlar", "Tahlil") — oddiy, bosilmaydigan matn
+      return `${sep}<span class="breadcrumb-item breadcrumb-group">${label}</span>`;
+    }).join('');
   },
 
   setupSidebarToggle() {
@@ -319,6 +338,8 @@ const Layout = {
     if (isOpen) {
       this.closeSidebar();
     } else {
+      // Sidebarni ochganda barcha ochiq dropdownlarni yopish
+      this.closeAllDropdowns();
       sidebar?.classList.add('open');
       overlay?.classList.add('open');
       document.body.classList.add('sidebar-open');
@@ -337,7 +358,11 @@ const Layout = {
     const btn = document.getElementById('navbar-user-btn');
     if (!dropdown || !btn) return;
     const isOpen = dropdown.classList.contains('show');
+    
+    // Avval bildirishnomalar va boshqa barcha dropdownlarni yopish
     this.closeNotifPanel();
+    document.querySelectorAll('.dropdown-menu.open, .dropdown.open').forEach(el => el.classList.remove('open'));
+
     if (isOpen) {
       this.closeUserMenu();
     } else {
@@ -355,35 +380,16 @@ const Layout = {
     btn?.setAttribute('aria-expanded', 'false');
   },
 
-  setupDropdownListeners() {
-    document.addEventListener('click', (e) => {
-      // Notification panel click outside
-      const notifContainer = document.querySelector('.notif-dropdown-container');
-      if (notifContainer && !notifContainer.contains(e.target)) {
-        this.closeNotifPanel();
-      }
-
-      // User dropdown click outside
-      const userContainer = document.querySelector('.navbar-user-container');
-      if (userContainer && !userContainer.contains(e.target)) {
-        this.closeUserMenu();
-      }
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        this.closeNotifPanel();
-        this.closeUserMenu();
-        this.closeSidebar();
-      }
-    });
-  },
-
   toggleNotifPanel(e) {
     if (e) { e.preventDefault(); e.stopPropagation(); }
     const panel = document.getElementById('notification-panel');
     if (!panel) return;
     const isOpen = panel.classList.contains('open');
+
+    // Avval foydalanuvchi menyusi va boshqa barcha dropdownlarni yopish
+    this.closeUserMenu();
+    document.querySelectorAll('.dropdown-menu.open, .dropdown.open').forEach(el => el.classList.remove('open'));
+
     if (isOpen) {
       this.closeNotifPanel();
     } else {
@@ -393,6 +399,89 @@ const Layout = {
 
   closeNotifPanel() {
     document.getElementById('notification-panel')?.classList.remove('open');
+  },
+
+  closeAllDropdowns() {
+    this.closeNotifPanel();
+    this.closeUserMenu();
+    document.querySelectorAll('.dropdown-menu.open').forEach(el => el.classList.remove('open'));
+    document.querySelectorAll('.dropdown.open').forEach(el => el.classList.remove('open'));
+  },
+
+  setupDropdownListeners() {
+    if (this._dropdownListenersSetup) return;
+    this._dropdownListenersSetup = true;
+
+    // 1. Tashqariga bosilganda avtomatik yopilish (pointerdown & click)
+    const handleOutsideClick = (e) => {
+      // Bildirishnomalar tashqarisiga bosilganda
+      const notifContainer = document.querySelector('.notif-dropdown-container');
+      if (notifContainer && !notifContainer.contains(e.target)) {
+        this.closeNotifPanel();
+      }
+
+      // Profil menyusi tashqarisiga bosilganda
+      const userContainer = document.querySelector('.navbar-user-container');
+      if (userContainer && !userContainer.contains(e.target)) {
+        this.closeUserMenu();
+      }
+
+      // Umumiy dropdown komponentlari
+      document.querySelectorAll('.dropdown').forEach(dropdown => {
+        if (!dropdown.contains(e.target)) {
+          dropdown.classList.remove('open');
+          dropdown.querySelector('.dropdown-menu')?.classList.remove('open');
+        }
+      });
+    };
+
+    document.addEventListener('pointerdown', handleOutsideClick);
+    document.addEventListener('click', handleOutsideClick);
+
+    // 2. Escape klavishi bosilganda barcha dropdown, modal va sidebarni yopish
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.key === 'Esc') {
+        this.closeAllDropdowns();
+        this.closeSidebar();
+        document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+          modal.classList.remove('active');
+        });
+      }
+    });
+
+    // 3. Sahifa scroll bo'lganda ochiq floating menyularni yopish (muallaq qolishini oldini oladi)
+    let scrollTimer = null;
+    window.addEventListener('scroll', () => {
+      if (!scrollTimer) {
+        scrollTimer = setTimeout(() => {
+          this.closeAllDropdowns();
+          scrollTimer = null;
+        }, 80);
+      }
+    }, { passive: true });
+
+    // 4. Oyna o'lchami o'zgarganda dropdownlarni tozalash
+    window.addEventListener('resize', () => {
+      this.closeAllDropdowns();
+      if (window.innerWidth > 1024) {
+        this.closeSidebar();
+      }
+    });
+
+    // 5. Biror link yoki navigatsiya bosilganda darhol barcha dropdownlarni yopish
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest('a');
+      if (link && (link.getAttribute('href') || link.getAttribute('data-page'))) {
+        this.closeAllDropdowns();
+        if (window.innerWidth <= 1024) {
+          this.closeSidebar();
+        }
+      }
+    });
+
+    // 6. Sahifa almashganda state tozalanishi
+    window.addEventListener('pagehide', () => this.closeAllDropdowns());
+    window.addEventListener('beforeunload', () => this.closeAllDropdowns());
   },
 
   getNotificationRoute(n) {
@@ -465,7 +554,7 @@ const Layout = {
     api.put(`/notifications/${id}/read`).catch(() => {});
 
     // 3. Close panel and navigate
-    this.closeNotifPanel();
+    this.closeAllDropdowns();
     if (targetRoute) {
       window.location.href = targetRoute;
     }
