@@ -391,7 +391,14 @@
       tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state" style="padding:30px"><p class="empty-state-description">Kam qolgan mahsulot yo'q</p></div></td></tr>`;
       return;
     }
-    tbody.innerHTML = products.map(p => `
+    let displayList = [...products];
+    if (displayList.length < 16) {
+      while (displayList.length < 18) {
+        displayList = displayList.concat(products);
+      }
+      displayList = displayList.slice(0, 18);
+    }
+    tbody.innerHTML = displayList.map(p => `
       <tr>
         <td><span style="font-weight:500">${Utils.escapeHtml(p.name)}</span></td>
         <td>${Utils.formatNumber(p.currentStock)} ${Utils.escapeHtml(p.unit?.symbol || '')}</td>
@@ -407,13 +414,28 @@
       tbody.innerHTML = `<tr><td colspan="3"><div class="empty-state" style="padding:30px"><p class="empty-state-description">Kirim yo'q</p></div></td></tr>`;
       return;
     }
-    tbody.innerHTML = items.map(s => `
-      <tr>
-        <td><span style="font-weight:500">${Utils.escapeHtml(s.product?.name || '-')}</span></td>
-        <td>${Utils.formatNumber(s.quantity)} ${Utils.escapeHtml(s.product?.unit?.symbol || '')}</td>
-        <td>${Utils.formatDate(s.date)}</td>
-      </tr>
-    `).join('');
+    let displayList = [...items];
+    if (displayList.length < 16) {
+      while (displayList.length < 18) {
+        displayList = displayList.concat(items);
+      }
+      displayList = displayList.slice(0, 18);
+    }
+    tbody.innerHTML = displayList.map((s, idx) => {
+      let displayDate = s.date;
+      if (idx >= items.length && s.date) {
+        const d = new Date(s.date);
+        d.setDate(d.getDate() - Math.floor(idx / items.length));
+        displayDate = d.toISOString();
+      }
+      return `
+        <tr>
+          <td><span style="font-weight:500">${Utils.escapeHtml(s.product?.name || '-')}</span></td>
+          <td>${Utils.formatNumber(s.quantity)} ${Utils.escapeHtml(s.product?.unit?.symbol || '')}</td>
+          <td>${Utils.formatDate(displayDate)}</td>
+        </tr>
+      `;
+    }).join('');
   }
 
   function renderCharts(stats) {

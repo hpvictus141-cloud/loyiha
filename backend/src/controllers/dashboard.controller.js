@@ -63,7 +63,7 @@ export const getDashboardStats = async (req, res, next) => {
         }
       }),
       prisma.stockIn.findMany({
-        take: 10,
+        take: 30,
         orderBy: { date: 'desc' },
         include: {
           product: {
@@ -80,7 +80,7 @@ export const getDashboardStats = async (req, res, next) => {
         }
       }),
       prisma.stockOut.findMany({
-        take: 10,
+        take: 30,
         orderBy: { date: 'desc' },
         include: {
           product: {
@@ -102,7 +102,7 @@ export const getDashboardStats = async (req, res, next) => {
         LEFT JOIN "Category" c ON p."categoryId" = c.id
         WHERE p."isActive" = true AND p."currentStock" <= p."minStock"
         ORDER BY p."currentStock" ASC
-        LIMIT 10
+        LIMIT 30
       `
     ]);
 
