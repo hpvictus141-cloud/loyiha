@@ -79,11 +79,18 @@ let frontendPath = path.join(__dirname, '../../frontend');
 if (!fs.existsSync(frontendPath)) {
   if (fs.existsSync(path.join(process.cwd(), 'frontend'))) {
     frontendPath = path.join(process.cwd(), 'frontend');
+  } else if (fs.existsSync(path.join(__dirname, '../frontend'))) {
+    frontendPath = path.join(__dirname, '../frontend');
+  } else if (fs.existsSync(path.join(__dirname, '../../../frontend'))) {
+    frontendPath = path.join(__dirname, '../../../frontend');
+  } else if (fs.existsSync(path.join(__dirname, 'frontend'))) {
+    frontendPath = path.join(__dirname, 'frontend');
   }
 }
 app.use('/assets', express.static(path.join(frontendPath, 'assets')));
 app.use('/css', express.static(path.join(frontendPath, 'css')));
 app.use('/js', express.static(path.join(frontendPath, 'js')));
+app.use(express.static(frontendPath));
 
 // Legacy HTML redirects
 app.get('/login.html', (req, res) => res.redirect('/login'));
