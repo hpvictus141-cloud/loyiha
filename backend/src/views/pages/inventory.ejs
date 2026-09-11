@@ -210,17 +210,21 @@
       if (st) params.status = st;
       
       const data = await api.get('/products', params);
-      const products = data.data.map(p => ({
+      let products = data.data.map(p => ({
         ...p,
         status: getProductStatus(p),
-        totalValue: p.currentStock * p.salePrice
+        totalValue: (parseFloat(p.currentStock) || 0) * (parseFloat(p.salePrice) || 0)
       }));
+
+      if (st) {
+        products = products.filter(p => p.status === st);
+      }
       
       renderTable(products);
       updateStats(products);
       
       const p = data.pagination;
-      document.getElementById('total-count').textContent = `Jami: ${p.total} ta`;
+      document.getElementById('total-count').textContent = `Jami: ${products.length} ta`;
       
       const paginationEl = document.getElementById('pagination');
       paginationEl.innerHTML = Utils.generatePaginationHTML(p);
@@ -231,10 +235,11 @@
   }
 
   function getProductStatus(product) {
-    // Demo: Har 4-mahsulotni yaroqsiz deb belgilaymiz
-    const isExpired = product.name.toLowerCase().includes('shikast') || 
-                     product.name.toLowerCase().includes('buzil') ||
-                     (product.currentStock < product.minStock && Math.random() > 0.7);
+    const name = (product.name || '').toLowerCase();
+    const isExpired = name.includes('shikast') || 
+                     name.includes('buzil') ||
+                     name.includes('yaroqsiz') ||
+                     parseFloat(product.currentStock || 0) <= 0;
     return isExpired ? 'expired' : 'good';
   }
 

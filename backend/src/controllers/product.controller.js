@@ -178,9 +178,9 @@ export const updateProduct = async (req, res, next) => {
         name,
         categoryId,
         unitId,
-        purchasePrice: purchasePrice ? parseFloat(purchasePrice) : undefined,
-        salePrice: salePrice ? parseFloat(salePrice) : undefined,
-        minStock: minStock ? parseFloat(minStock) : undefined,
+        purchasePrice: (purchasePrice !== undefined && purchasePrice !== '') ? parseFloat(purchasePrice) : undefined,
+        salePrice: (salePrice !== undefined && salePrice !== '') ? parseFloat(salePrice) : undefined,
+        minStock: (minStock !== undefined && minStock !== '') ? parseFloat(minStock) : undefined,
         description,
         barcode,
         isActive

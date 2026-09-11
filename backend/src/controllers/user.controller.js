@@ -143,18 +143,19 @@ export const createUser = async (req, res, next) => {
       });
     }
 
-    // Check if email exists
-    if (email) {
-      const existingEmail = await prisma.user.findUnique({
-        where: { email }
-      });
+    const trimmedUsername = username.trim();
+    const finalEmail = (email && email.trim()) ? email.trim() : `${trimmedUsername}@warehouse.local`;
 
-      if (existingEmail) {
-        return res.status(400).json({
-          success: false,
-          message: 'Bu email allaqachon mavjud'
-        });
-      }
+    // Check if email exists
+    const existingEmail = await prisma.user.findUnique({
+      where: { email: finalEmail }
+    });
+
+    if (existingEmail) {
+      return res.status(400).json({
+        success: false,
+        message: 'Bu email allaqachon mavjud'
+      });
     }
 
     // Hash password
@@ -163,8 +164,8 @@ export const createUser = async (req, res, next) => {
     // Create user
     const user = await prisma.user.create({
       data: {
-        username,
-        email,
+        username: trimmedUsername,
+        email: finalEmail,
         password: hashedPassword,
         fullName,
         phone,
@@ -216,9 +217,10 @@ export const updateUser = async (req, res, next) => {
     }
 
     // Check if email is being changed and if new email exists
-    if (email && email !== existingUser.email) {
+    const trimmedEmail = (email && typeof email === 'string' && email.trim()) ? email.trim() : undefined;
+    if (trimmedEmail && trimmedEmail !== existingUser.email) {
       const existingEmail = await prisma.user.findUnique({
-        where: { email }
+        where: { email: trimmedEmail }
       });
 
       if (existingEmail) {
@@ -233,7 +235,7 @@ export const updateUser = async (req, res, next) => {
     const user = await prisma.user.update({
       where: { id },
       data: {
-        email,
+        email: trimmedEmail,
         fullName,
         phone,
         roleId,

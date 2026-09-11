@@ -110,14 +110,14 @@ export const getDashboardStats = async (req, res, next) => {
     let todayStockOutTotal = 0;
     if (Array.isArray(todayStockOutsData)) {
       todayStockOutsData.forEach(out => {
-        const quantity = parseFloat(out.quantity);
-        const price = parseFloat(out.product.salePrice);
+        const quantity = parseFloat(out.quantity || 0);
+        const price = out.product ? parseFloat(out.product.salePrice || 0) : 0;
         todayStockOutTotal += quantity * price;
       });
     }
 
     // Low stock mahsulotlarni formatlash
-    const formattedLowStock = lowStockProducts.map(p => ({
+    const formattedLowStock = (lowStockProducts || []).map(p => ({
       id: p.id,
       code: p.code,
       name: p.name,
@@ -139,10 +139,10 @@ export const getDashboardStats = async (req, res, next) => {
           products: productsCount,
           categories: categoriesCount,
           suppliers: suppliersCount,
-          lowStock: parseInt(lowStockCount[0].count),
+          lowStock: (lowStockCount && lowStockCount[0] && lowStockCount[0].count !== undefined) ? parseInt(lowStockCount[0].count) : 0,
           todayStockIns: todayStockInsCount,
           todayStockOuts: todayStockOutsCount,
-          todayStockInValue: parseFloat(todayStockInValue._sum.totalAmount || 0),
+          todayStockInValue: parseFloat(todayStockInValue?._sum?.totalAmount || 0),
           todayStockOutValue: todayStockOutTotal
         },
         recentStockIns,
