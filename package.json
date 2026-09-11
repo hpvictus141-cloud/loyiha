@@ -12,8 +12,7 @@
     "studio": "npm run studio --prefix backend",
     "setup": "npm install --prefix backend && npm run generate --prefix backend",
     "build": "npm run generate --prefix backend",
-    "vercel-build": "npm run generate --prefix backend",
-    "postinstall": "cd backend && npm install"
+    "vercel-build": "npm run generate --prefix backend"
   },
   "workspaces": [
     "backend"
