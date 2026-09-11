@@ -99,7 +99,13 @@ const api = {
         } else if (response.status === 429) {
           errorMsg = 'Juda ko\'p so\'rov yuborildi. Iltimos, birozdan so\'ng qayta urinib ko\'ring.';
         } else if (response.status === 403) {
-          errorMsg = 'Ushbu amalni bajarish uchun sizda huquq yetarli emas';
+          errorMsg = (data && data.reason === 'invalid_role') 
+            ? 'Sizda bu amalni bajarish uchun ruxsat yo\'q' 
+            : 'Ushbu amalni bajarish uchun sizda huquq yetarli emas';
+        } else if (response.status === 401) {
+          errorMsg = (data && data.reason === 'token_expired')
+            ? 'Sessiya muddati tugadi. Iltimos, qayta kiring.'
+            : 'Autentifikatsiya talab qilinadi. Iltimos, tizimga kiring.';
         } else if (response.status >= 500) {
           errorMsg = 'Serverda xatolik yuz berdi';
         } else {
@@ -114,6 +120,7 @@ const api = {
         const customErr = new Error(errorMsg);
         customErr.status = response.status;
         customErr.data = data;
+        customErr.reason = data?.reason || null;
         customErr.field = (data && (data.field || (data.details && data.details.field))) || null;
         throw customErr;
       }

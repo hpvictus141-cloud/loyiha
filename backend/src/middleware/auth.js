@@ -3,12 +3,20 @@ import prisma from '../config/database.js';
 
 export const authenticate = async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    const authHeader = req.headers.authorization;
+    let token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+
+    // Cookie fallback
+    if (!token && req.cookies?.accessToken) {
+      token = req.cookies.accessToken;
+    }
     
     if (!token) {
       return res.status(401).json({ 
         success: false, 
-        message: 'Autentifikatsiya tokeni topilmadi' 
+        error: 'Autentifikatsiya tokeni topilmadi',
+        message: 'Autentifikatsiya tokeni topilmadi. Iltimos, tizimga kiring.',
+        reason: 'token_missing'
       });
     }
 
@@ -28,7 +36,9 @@ export const authenticate = async (req, res, next) => {
     if (!user || !user.isActive) {
       return res.status(401).json({ 
         success: false, 
-        message: 'Foydalanuvchi topilmadi yoki faol emas' 
+        error: 'Foydalanuvchi topilmadi yoki faol emas',
+        message: 'Foydalanuvchi topilmadi yoki hisob faol emas',
+        reason: 'user_inactive'
       });
     }
 
@@ -38,12 +48,16 @@ export const authenticate = async (req, res, next) => {
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({ 
         success: false, 
-        message: 'Token muddati tugagan' 
+        error: 'Sessiya muddati tugadi',
+        message: 'Sessiya muddati tugadi. Iltimos, tizimga qayta kiring.',
+        reason: 'token_expired'
       });
     }
     return res.status(401).json({ 
       success: false, 
-      message: 'Yaroqsiz token' 
+      error: 'Yaroqsiz token',
+      message: 'Yaroqsiz token. Iltimos, tizimga qayta kiring.',
+      reason: 'invalid_token'
     });
   }
 };
@@ -53,22 +67,61 @@ export const authorize = (...requiredPermissions) => {
     if (!req.user) {
       return res.status(401).json({ 
         success: false, 
-        message: 'Autentifikatsiya talab qilinadi' 
+        error: 'Autentifikatsiya talab qilinadi',
+        message: 'Autentifikatsiya talab qilinadi',
+        reason: 'unauthorized'
       });
     }
 
-    const userPermissions = req.user.role.permissions.map(
+    const roleName = (req.user.role?.name || '').toLowerCase().trim();
+
+    // 1. Administrator har doim barcha amallarga to'liq ruxsatga ega
+    if (roleName === 'admin' || roleName === 'administrator') {
+      return next();
+    }
+
+    const permissions = req.user.role?.permissions || [];
+    const userPermissions = permissions.map(
       p => `${p.module}:${p.action}`
     );
 
-    const hasPermission = requiredPermissions.some(
-      permission => userPermissions.includes(permission) || userPermissions.includes('*:*')
-    );
+    // 2. Wildcard va maxsus ruxsatlar tekshiruvi (*:*, module:*, yoki aniq module:action)
+    const hasPermission = requiredPermissions.some(permission => {
+      if (userPermissions.includes(permission)) return true;
+      if (userPermissions.includes('*:*')) return true;
+      
+      const [module, action] = permission.split(':');
+      if (userPermissions.includes(`${module}:*`)) return true;
+      if (userPermissions.includes(`*:${action}`)) return true;
+      return false;
+    });
+
+    // 3. Operator va Omborchi rollari uchun standart ombor amallariga ruxsat
+    if (!hasPermission && (roleName === 'operator' || roleName === 'omborchi')) {
+      const isAllowedForOperator = requiredPermissions.every(p => 
+        p.startsWith('products:') || 
+        p.startsWith('categories:') || 
+        p.startsWith('units:') || 
+        p.startsWith('suppliers:') || 
+        p.startsWith('stock:') || 
+        p.startsWith('inventory:') ||
+        p.startsWith('reports:read')
+      );
+      if (isAllowedForOperator) {
+        return next();
+      }
+    }
 
     if (!hasPermission) {
       return res.status(403).json({ 
         success: false, 
-        message: 'Ruxsat berilmagan' 
+        error: 'Sizda bu amalni bajarish uchun ruxsat yo\'q',
+        message: 'Sizda bu amalni bajarish uchun ruxsat yo\'q',
+        reason: 'invalid_role',
+        details: {
+          role: req.user.role?.name,
+          requiredPermissions
+        }
       });
     }
 
