@@ -337,7 +337,7 @@
 
 <script>
   if (!Layout.init()) throw new Error('Auth failed');
-  Layout.setBreadcrumb([{label: 'Profil'}]);
+  Layout.setBreadcrumb([{label: 'Boshqaruv', href: '/boshqaruv'}, {label: 'Profil'}]);
 
   let me = null;        // /auth/profile dan kelgan yangi ma'lumot
   let snapshot = {};    // tahrirni bekor qilish uchun

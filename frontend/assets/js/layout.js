@@ -139,6 +139,13 @@ const Layout = {
 
         <div class="nav-section">
           <div class="nav-section-title">Boshqaruv</div>
+          <a href="/boshqaruv" class="nav-item" data-page="boshqaruv">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+            </svg>
+            Boshqaruv paneli
+          </a>
           ${isAdmin ? `
           <a href="/users" class="nav-item" data-page="users">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -297,14 +304,30 @@ const Layout = {
         return `${sep}<span class="breadcrumb-item breadcrumb-current active" aria-current="page">${label}</span>`;
       }
 
-      if (item.href) {
-        // Faqat haqiqiy sahifa linki bo'lsagina <a> qilib chiziladi
-        return `${sep}<a href="${item.href}" class="breadcrumb-item breadcrumb-link">${label}</a>`;
+      // Agar 'Boshqaruv' bo'lsa va href berilmagan bo'lsa, avtomatik /boshqaruv sahifasiga ulaymiz
+      let href = item.href;
+      if (!href && item.label && item.label.toLowerCase().trim() === 'boshqaruv') {
+        href = '/boshqaruv';
       }
 
-      // Guruh nomi (masalan "Boshqaruv", "Omborxona", "Ma'lumotlar", "Tahlil") — oddiy, bosilmaydigan matn
+      if (href) {
+        // Faqat haqiqiy sahifa linki bo'lsagina <a> qilib chiziladi
+        return `${sep}<a href="${href}" class="breadcrumb-item breadcrumb-link">${label}</a>`;
+      }
+
+      // Guruh nomi — oddiy, bosilmaydigan matn
       return `${sep}<span class="breadcrumb-item breadcrumb-group">${label}</span>`;
     }).join('');
+  },
+
+  toggleCard(btn) {
+    const card = btn.closest('.card');
+    if (!card) return;
+    const isCollapsed = card.classList.toggle('collapsed');
+    const icon = card.querySelector('.card-toggle-icon');
+    if (icon) {
+      icon.style.transform = isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+    }
   },
 
   setupSidebarToggle() {

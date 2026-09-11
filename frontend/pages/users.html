@@ -97,7 +97,7 @@
 <script src="../assets/js/layout.js"></script>
 <script>
   if (!Layout.init()) throw new Error('Auth failed');
-  Layout.setBreadcrumb([{label: 'Boshqaruv'}, {label: 'Foydalanuvchilar'}]);
+  Layout.setBreadcrumb([{label: 'Boshqaruv', href: '/boshqaruv'}, {label: 'Foydalanuvchilar'}]);
 
   async function init() {
     await loadRoles();

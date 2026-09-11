@@ -120,7 +120,7 @@
 <script src="../assets/js/layout.js"></script>
 <script>
   if (!Layout.init()) throw new Error('Auth failed');
-  Layout.setBreadcrumb([{label: 'Boshqaruv'}, {label: 'Sozlamalar'}]);
+  Layout.setBreadcrumb([{label: 'Boshqaruv', href: '/boshqaruv'}, {label: 'Sozlamalar'}]);
 
   const currentTheme = ThemeManager.getCurrent();
   document.querySelectorAll('input[name="theme-radio"]').forEach(r => {

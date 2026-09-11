@@ -230,6 +230,14 @@ app.get('/reports', (req, res) => {
   });
 });
 
+app.get('/boshqaruv', (req, res) => {
+  res.render('pages/boshqaruv', {
+    title: 'Boshqaruv Paneli - OmborXona',
+    page: 'boshqaruv'
+  });
+});
+app.get('/management', (req, res) => res.redirect('/boshqaruv'));
+
 app.get('/users', (req, res) => {
   res.render('pages/users', {
     title: 'Foydalanuvchilar - OmborXona',

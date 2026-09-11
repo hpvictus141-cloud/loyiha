@@ -1016,6 +1016,45 @@ html, body {
   box-sizing: border-box;
 }
 
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-action-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.card-action-btn:hover {
+  background: rgba(59, 130, 246, 0.2);
+  color: #f1f5f9;
+}
+
+.card-toggle-icon {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card.collapsed .card-body,
+.card.collapsed .table-container,
+.card.collapsed .card-footer {
+  display: none !important;
+}
+
+.card.collapsed .card-header {
+  border-bottom: none !important;
+}
+
 .table-container {
   width: 100%;
   max-width: 100%;

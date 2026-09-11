@@ -150,7 +150,7 @@
 
 <script>
   if (!Layout.init()) throw new Error('Auth failed');
-  Layout.setBreadcrumb([{label: 'Boshqaruv'}, {label: 'Foydalanuvchilar'}]);
+  Layout.setBreadcrumb([{label: 'Boshqaruv', href: '/boshqaruv'}, {label: 'Foydalanuvchilar'}]);
 
   const user = Auth.getUser();
   const isAdmin = user?.role?.name === 'Admin';
