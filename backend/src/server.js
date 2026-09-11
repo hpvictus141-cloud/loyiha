@@ -90,7 +90,7 @@ if (!fs.existsSync(frontendPath)) {
 app.use('/assets', express.static(path.join(frontendPath, 'assets')));
 app.use('/css', express.static(path.join(frontendPath, 'css')));
 app.use('/js', express.static(path.join(frontendPath, 'js')));
-app.use(express.static(frontendPath));
+app.use(express.static(frontendPath, { index: false }));
 
 // Legacy HTML redirects
 app.get('/login.html', (req, res) => res.redirect('/login'));
