@@ -150,6 +150,13 @@ export const login = async (req, res, next) => {
 
     const { password: _, ...userWithoutPassword } = user;
 
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
     res.json({
       success: true,
       message: 'Tizimga kirish muvaffaqiyatli',
@@ -212,6 +219,13 @@ export const refreshToken = async (req, res, next) => {
 
     const { password: _, ...userWithoutPassword } = session.user;
 
+    res.cookie('accessToken', newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
     res.json({
       success: true,
       data: {
@@ -234,6 +248,8 @@ export const logout = async (req, res, next) => {
         where: { refreshToken }
       });
     }
+
+    res.clearCookie('accessToken');
 
     res.json({
       success: true,

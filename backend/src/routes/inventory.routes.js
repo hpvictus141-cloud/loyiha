@@ -6,15 +6,16 @@ const router = express.Router();
 
 router.get('/', authenticate, async (req, res, next) => {
   try {
-    const { page = 1, limit = 10, productId } = req.query;
-    const skip = (page - 1) * limit;
+    const cleanPage = Math.max(1, parseInt(page) || 1);
+    const cleanLimit = Math.max(1, Math.min(100, parseInt(limit) || 10));
+    const skip = Math.max(0, (cleanPage - 1) * cleanLimit);
     const where = productId ? { productId } : {};
 
     const [logs, total] = await Promise.all([
       prisma.inventoryLog.findMany({
         where,
-        skip: parseInt(skip),
-        take: parseInt(limit),
+        skip,
+        take: cleanLimit,
         orderBy: { createdAt: 'desc' },
         include: {
           product: {
@@ -31,10 +32,10 @@ router.get('/', authenticate, async (req, res, next) => {
       success: true,
       data: logs,
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page: cleanPage,
+        limit: cleanLimit,
         total,
-        pages: Math.ceil(total / limit)
+        pages: Math.ceil(total / cleanLimit)
       }
     });
   } catch (error) {

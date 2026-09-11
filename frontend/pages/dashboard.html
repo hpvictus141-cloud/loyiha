@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="uz" data-theme="light">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,10 +13,15 @@
   <style>
     /* Additional modern animations and styles */
     @keyframes shimmer {
-      0% { background-position: -1000px 0; }
-      100% { background-position: 1000px 0; }
+      0% {
+        background-position: -1000px 0;
+      }
+
+      100% {
+        background-position: 1000px 0;
+      }
     }
-    
+
     .loading-shimmer {
       animation: shimmer 2s infinite linear;
       background: linear-gradient(to right, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0.15) 50%, rgba(59, 130, 246, 0.05) 100%);
@@ -135,161 +141,216 @@
     }
   </style>
 </head>
+
 <body>
-<div class="admin-layout">
-  <aside class="sidebar" id="sidebar"></aside>
-  <div class="main-content">
-    <header class="navbar" id="navbar"></header>
-    <main class="page-content">
-      <div class="page-header">
-        <div>
-          <h1 class="page-title">Dashboard</h1>
-          <p class="page-subtitle" id="greeting-text"></p>
+  <div class="admin-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main-content">
+      <header class="navbar" id="navbar"></header>
+      <main class="page-content">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-subtitle" id="greeting-text"></p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="loadDashboard()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Yangilash
+          </button>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="loadDashboard()">
-          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-          </svg>
-          Yangilash
-        </button>
-      </div>
 
-      <!-- Stats -->
-      <div class="stats-cards" id="stats-cards">
-        <div class="stat-card">
-          <div class="stat-card-icon blue"><div class="skeleton" style="width:32px;height:32px;border-radius:8px"></div></div>
-          <div class="stat-card-body"><div class="skeleton" style="height:14px;width:80%;margin-bottom:8px"></div><div class="skeleton" style="height:28px;width:50%"></div></div>
+        <!-- Stats -->
+        <div class="stats-cards" id="stats-cards">
+          <div class="stat-card">
+            <div class="stat-card-icon blue">
+              <div class="skeleton" style="width:32px;height:32px;border-radius:8px"></div>
+            </div>
+            <div class="stat-card-body">
+              <div class="skeleton" style="height:14px;width:80%;margin-bottom:8px"></div>
+              <div class="skeleton" style="height:28px;width:50%"></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon green">
+              <div class="skeleton" style="width:32px;height:32px;border-radius:8px"></div>
+            </div>
+            <div class="stat-card-body">
+              <div class="skeleton" style="height:14px;width:80%;margin-bottom:8px"></div>
+              <div class="skeleton" style="height:28px;width:50%"></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon orange">
+              <div class="skeleton" style="width:32px;height:32px;border-radius:8px"></div>
+            </div>
+            <div class="stat-card-body">
+              <div class="skeleton" style="height:14px;width:80%;margin-bottom:8px"></div>
+              <div class="skeleton" style="height:28px;width:50%"></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon red">
+              <div class="skeleton" style="width:32px;height:32px;border-radius:8px"></div>
+            </div>
+            <div class="stat-card-body">
+              <div class="skeleton" style="height:14px;width:80%;margin-bottom:8px"></div>
+              <div class="skeleton" style="height:28px;width:50%"></div>
+            </div>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-card-icon green"><div class="skeleton" style="width:32px;height:32px;border-radius:8px"></div></div>
-          <div class="stat-card-body"><div class="skeleton" style="height:14px;width:80%;margin-bottom:8px"></div><div class="skeleton" style="height:28px;width:50%"></div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-icon orange"><div class="skeleton" style="width:32px;height:32px;border-radius:8px"></div></div>
-          <div class="stat-card-body"><div class="skeleton" style="height:14px;width:80%;margin-bottom:8px"></div><div class="skeleton" style="height:28px;width:50%"></div></div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-card-icon red"><div class="skeleton" style="width:32px;height:32px;border-radius:8px"></div></div>
-          <div class="stat-card-body"><div class="skeleton" style="height:14px;width:80%;margin-bottom:8px"></div><div class="skeleton" style="height:28px;width:50%"></div></div>
-        </div>
-      </div>
 
-      <!-- Charts + Recent -->
-      <div class="grid" style="grid-template-columns:1fr 360px;gap:20px;margin-bottom:24px">
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">Kirim/Chiqim dinamikasi (so'nggi 30 kun)</span>
+        <!-- Charts + Recent -->
+        <div class="grid" style="grid-template-columns:1fr 360px;gap:20px;margin-bottom:24px">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Kirim/Chiqim dinamikasi (so'nggi 30 kun)</span>
+            </div>
+            <div class="card-body">
+              <div class="chart-wrapper">
+                <canvas id="movements-chart"></canvas>
+              </div>
+            </div>
           </div>
-          <div class="card-body">
-            <div class="chart-wrapper">
-              <canvas id="movements-chart"></canvas>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Bugungi ko'rsatkichlar</span></div>
+            <div class="card-body">
+              <div class="chart-wrapper">
+                <canvas id="today-chart"></canvas>
+              </div>
             </div>
           </div>
         </div>
-        <div class="card">
-          <div class="card-header"><span class="card-title">Bugungi ko'rsatkichlar</span></div>
-          <div class="card-body">
-            <div class="chart-wrapper">
-              <canvas id="today-chart"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Low stock + Recent activity -->
-      <div class="grid grid-2" style="gap:20px">
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">Kam qolgan mahsulotlar</span>
-            <div class="card-actions">
-              <a href="inventory.html" class="btn btn-secondary btn-sm">Barchasi</a>
-              <button type="button" class="card-action-btn" onclick="Layout.toggleCard(this)" title="Yig'ish / Yoyish">
-                <svg class="card-toggle-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-              </button>
+        <!-- Low stock + Recent activity -->
+        <div class="grid grid-2" style="gap:20px">
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Kam qolgan mahsulotlar</span>
+              <div class="card-actions">
+                <a href="inventory.html" class="btn btn-secondary btn-sm">Barchasi</a>
+                <button type="button" class="card-action-btn" onclick="Layout.toggleCard(this)"
+                  title="Yig'ish / Yoyish">
+                  <svg class="card-toggle-icon" width="16" height="16" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Mahsulot</th>
+                    <th>Qoldiq</th>
+                    <th>Min</th>
+                    <th>Holat</th>
+                  </tr>
+                </thead>
+                <tbody id="low-stock-table">
+                  <tr>
+                    <td colspan="4">
+                      <div class="skeleton" style="height:40px;margin:8px"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
-          <div class="table-container">
-            <table class="table">
-              <thead><tr><th>Mahsulot</th><th>Qoldiq</th><th>Min</th><th>Holat</th></tr></thead>
-              <tbody id="low-stock-table"><tr><td colspan="4"><div class="skeleton" style="height:40px;margin:8px"></div></td></tr></tbody>
-            </table>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">So'nggi kirimlar</span>
-            <div class="card-actions">
-              <a href="stock-in.html" class="btn btn-secondary btn-sm">Barchasi</a>
-              <button type="button" class="card-action-btn" onclick="Layout.toggleCard(this)" title="Yig'ish / Yoyish">
-                <svg class="card-toggle-icon" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-              </button>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">So'nggi kirimlar</span>
+              <div class="card-actions">
+                <a href="stock-in.html" class="btn btn-secondary btn-sm">Barchasi</a>
+                <button type="button" class="card-action-btn" onclick="Layout.toggleCard(this)"
+                  title="Yig'ish / Yoyish">
+                  <svg class="card-toggle-icon" width="16" height="16" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="table-container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Mahsulot</th>
+                    <th>Miqdor</th>
+                    <th>Sana</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-stock-in-table">
+                  <tr>
+                    <td colspan="3">
+                      <div class="skeleton" style="height:40px;margin:8px"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
-          <div class="table-container">
-            <table class="table">
-              <thead><tr><th>Mahsulot</th><th>Miqdor</th><th>Sana</th></tr></thead>
-              <tbody id="recent-stock-in-table"><tr><td colspan="3"><div class="skeleton" style="height:40px;margin:8px"></div></td></tr></tbody>
-            </table>
-          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   </div>
-</div>
 
-<div id="toast-container" class="toast-container"></div>
+  <div id="toast-container" class="toast-container"></div>
 
-<script src="../assets/js/api.js"></script>
-<script src="../assets/js/utils.js"></script>
-<script src="../assets/js/auth.js"></script>
-<script src="../assets/js/realtime.js"></script>
-<script src="../assets/js/layout.js"></script>
-<script>
-  if (!Layout.init()) throw new Error('Auth failed');
-  Layout.setBreadcrumb([{label: 'Dashboard'}]);
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/utils.js"></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/realtime.js"></script>
+  <script src="../assets/js/layout.js"></script>
+  <script>
+    if (!Layout.init()) throw new Error('Auth failed');
+    Layout.setBreadcrumb([{ label: 'Dashboard' }]);
 
-  const now = new Date();
-  const hours = now.getHours();
-  let greet = hours < 12 ? 'Xayrli tong' : hours < 17 ? 'Xayrli kun' : 'Xayrli kech';
-  const user = Auth.getUser();
-  document.getElementById('greeting-text').textContent = `${greet}, ${user?.fullName || 'Foydalanuvchi'}`;
-
-  // Initialize real-time updates
-  const realtimeManager = new RealtimeManager();
-  realtimeManager.init();
-  realtimeManager.subscribe('dashboard', loadDashboard);
-
-  let movementsChart, todayChart;
-
-  async function loadDashboard() {
+    const now = new Date();
+    const hours = now.getHours();
+    let greet = hours < 12 ? 'Xayrli tong' : hours < 17 ? 'Xayrli kun' : 'Xayrli kech';
     const user = Auth.getUser();
-    const isAdmin = user?.role?.name === 'Admin';
-    
-    try {
-      const data = await api.get('/dashboard/stats');
-      const { stats, lowStockProducts, recentStockIns } = data.data;
-      renderStats(stats, isAdmin);
-      renderLowStock(lowStockProducts);
-      if (isAdmin) {
-        renderRecentStockIn(recentStockIns);
-        renderCharts(stats);
-      } else {
-        // Operator uchun grafiklar va kirim jadvalini yashirish
-        document.querySelector('.grid').style.display = 'none';
-        const tables = document.querySelectorAll('.card');
-        if (tables.length > 1) {
-          tables[1].style.display = 'none'; // Kirim jadvalini yashirish
-        }
-      }
-    } catch (e) {
-      Toast.error(e.message);
-    }
-  }
+    document.getElementById('greeting-text').textContent = `${greet}, ${user?.fullName || 'Foydalanuvchi'}`;
 
-  function renderStats(stats, isAdmin) {
-    if (isAdmin) {
-      // Admin uchun to'liq statistika
-      document.getElementById('stats-cards').innerHTML = `
+    // Initialize real-time updates
+    const realtimeManager = new RealtimeManager();
+    realtimeManager.init();
+    realtimeManager.subscribe('dashboard', loadDashboard);
+
+    let movementsChart, todayChart;
+
+    async function loadDashboard() {
+      const user = Auth.getUser();
+      const isAdmin = user?.role?.name === 'Admin';
+
+      try {
+        const data = await api.get('/dashboard/stats');
+        const { stats, lowStockProducts, recentStockIns } = data.data;
+        renderStats(stats, isAdmin);
+        renderLowStock(lowStockProducts);
+        if (isAdmin) {
+          renderRecentStockIn(recentStockIns);
+          renderCharts(stats);
+        } else {
+          // Operator uchun grafiklar va kirim jadvalini yashirish
+          document.querySelector('.grid').style.display = 'none';
+          const tables = document.querySelectorAll('.card');
+          if (tables.length > 1) {
+            tables[1].style.display = 'none'; // Kirim jadvalini yashirish
+          }
+        }
+      } catch (e) {
+        Toast.error(e.message);
+      }
+    }
+
+    function renderStats(stats, isAdmin) {
+      if (isAdmin) {
+        // Admin uchun to'liq statistika
+        document.getElementById('stats-cards').innerHTML = `
         <div class="stat-card">
           <div class="stat-card-icon blue">
             <svg width="28" height="28" fill="none" stroke="#fff" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
@@ -343,9 +404,9 @@
           </div>
         </div>
       `;
-    } else {
-      // Operator uchun oddiy statistika
-      document.getElementById('stats-cards').innerHTML = `
+      } else {
+        // Operator uchun oddiy statistika
+        document.getElementById('stats-cards').innerHTML = `
         <div class="stat-card">
           <div class="stat-card-icon blue">
             <svg width="28" height="28" fill="none" stroke="#fff" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
@@ -377,28 +438,28 @@
           </div>
         </div>
       `;
-    }
-    
-    // Animate counter values
-    setTimeout(() => {
-      AnimatedCounter.animateAll();
-    }, 100);
-  }
-
-  function renderLowStock(products) {
-    const tbody = document.getElementById('low-stock-table');
-    if (!products?.length) {
-      tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state" style="padding:30px"><p class="empty-state-description">Kam qolgan mahsulot yo'q</p></div></td></tr>`;
-      return;
-    }
-    let displayList = [...products];
-    if (displayList.length < 16) {
-      while (displayList.length < 18) {
-        displayList = displayList.concat(products);
       }
-      displayList = displayList.slice(0, 18);
+
+      // Animate counter values
+      setTimeout(() => {
+        AnimatedCounter.animateAll();
+      }, 100);
     }
-    tbody.innerHTML = displayList.map(p => `
+
+    function renderLowStock(products) {
+      const tbody = document.getElementById('low-stock-table');
+      if (!products?.length) {
+        tbody.innerHTML = `<tr><td colspan="4"><div class="empty-state" style="padding:30px"><p class="empty-state-description">Kam qolgan mahsulot yo'q</p></div></td></tr>`;
+        return;
+      }
+      let displayList = [...products];
+      if (displayList.length < 16) {
+        while (displayList.length < 18) {
+          displayList = displayList.concat(products);
+        }
+        displayList = displayList.slice(0, 18);
+      }
+      tbody.innerHTML = displayList.map(p => `
       <tr>
         <td><span style="font-weight:500">${Utils.escapeHtml(p.name)}</span></td>
         <td>${Utils.formatNumber(p.currentStock)} ${Utils.escapeHtml(p.unit?.symbol || '')}</td>
@@ -406,84 +467,85 @@
         <td><span class="badge badge-danger">Kam</span></td>
       </tr>
     `).join('');
-  }
+    }
 
-  function renderRecentStockIn(items) {
-    const tbody = document.getElementById('recent-stock-in-table');
-    if (!items?.length) {
-      tbody.innerHTML = `<tr><td colspan="3"><div class="empty-state" style="padding:30px"><p class="empty-state-description">Kirim yo'q</p></div></td></tr>`;
-      return;
-    }
-    let displayList = [...items];
-    if (displayList.length < 16) {
-      while (displayList.length < 18) {
-        displayList = displayList.concat(items);
+    function renderRecentStockIn(items) {
+      const tbody = document.getElementById('recent-stock-in-table');
+      if (!items?.length) {
+        tbody.innerHTML = `<tr><td colspan="3"><div class="empty-state" style="padding:30px"><p class="empty-state-description">Kirim yo'q</p></div></td></tr>`;
+        return;
       }
-      displayList = displayList.slice(0, 18);
-    }
-    tbody.innerHTML = displayList.map((s, idx) => {
-      let displayDate = s.date;
-      if (idx >= items.length && s.date) {
-        const d = new Date(s.date);
-        d.setDate(d.getDate() - Math.floor(idx / items.length));
-        displayDate = d.toISOString();
+      let displayList = [...items];
+      if (displayList.length < 16) {
+        while (displayList.length < 18) {
+          displayList = displayList.concat(items);
+        }
+        displayList = displayList.slice(0, 18);
       }
-      return `
+      tbody.innerHTML = displayList.map((s, idx) => {
+        let displayDate = s.date;
+        if (idx >= items.length && s.date) {
+          const d = new Date(s.date);
+          d.setDate(d.getDate() - Math.floor(idx / items.length));
+          displayDate = d.toISOString();
+        }
+        return `
         <tr>
           <td><span style="font-weight:500">${Utils.escapeHtml(s.product?.name || '-')}</span></td>
           <td>${Utils.formatNumber(s.quantity)} ${Utils.escapeHtml(s.product?.unit?.symbol || '')}</td>
           <td>${Utils.formatDate(displayDate)}</td>
         </tr>
       `;
-    }).join('');
-  }
+      }).join('');
+    }
 
-  function renderCharts(stats) {
-    const isDark = ThemeManager.getCurrent() === 'dark';
-    const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
-    const textColor = isDark ? '#9ca3af' : '#6b7280';
+    function renderCharts(stats) {
+      const isDark = ThemeManager.getCurrent() === 'dark';
+      const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+      const textColor = isDark ? '#9ca3af' : '#6b7280';
 
-    if (movementsChart) movementsChart.destroy();
-    const ctx = document.getElementById('movements-chart').getContext('2d');
-    movementsChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['1-hafta', '2-hafta', '3-hafta', '4-hafta'],
-        datasets: [
-          { label: 'Kirim', data: [0, 0, 0, stats.todayStockIns], borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.1)', borderWidth: 2, fill: true, tension: 0.4 },
-          { label: 'Chiqim', data: [0, 0, 0, stats.todayStockOuts], borderColor: '#d97706', backgroundColor: 'rgba(217,119,6,0.1)', borderWidth: 2, fill: true, tension: 0.4 }
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { labels: { color: textColor, font: { size: 12 } } } },
-        scales: {
-          x: { grid: { color: gridColor }, ticks: { color: textColor } },
-          y: { grid: { color: gridColor }, ticks: { color: textColor } }
+      if (movementsChart) movementsChart.destroy();
+      const ctx = document.getElementById('movements-chart').getContext('2d');
+      movementsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['1-hafta', '2-hafta', '3-hafta', '4-hafta'],
+          datasets: [
+            { label: 'Kirim', data: [0, 0, 0, stats.todayStockIns], borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.1)', borderWidth: 2, fill: true, tension: 0.4 },
+            { label: 'Chiqim', data: [0, 0, 0, stats.todayStockOuts], borderColor: '#d97706', backgroundColor: 'rgba(217,119,6,0.1)', borderWidth: 2, fill: true, tension: 0.4 }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: textColor, font: { size: 12 } } } },
+          scales: {
+            x: { grid: { color: gridColor }, ticks: { color: textColor } },
+            y: { grid: { color: gridColor }, ticks: { color: textColor } }
+          }
         }
-      }
-    });
+      });
 
-    if (todayChart) todayChart.destroy();
-    const ctx2 = document.getElementById('today-chart').getContext('2d');
-    todayChart = new Chart(ctx2, {
-      type: 'doughnut',
-      data: {
-        labels: ['Kirim', 'Chiqim', 'Yetkazib beruvchilar'],
-        datasets: [{
-          data: [stats.todayStockIns || 1, stats.todayStockOuts || 1, stats.suppliers || 1],
-          backgroundColor: ['#2563eb', '#d97706', '#059669'],
-          borderWidth: 0, hoverOffset: 4
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom', labels: { color: textColor, padding: 16, font: { size: 12 } } } }
-      }
-    });
-  }
+      if (todayChart) todayChart.destroy();
+      const ctx2 = document.getElementById('today-chart').getContext('2d');
+      todayChart = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: ['Kirim', 'Chiqim', 'Yetkazib beruvchilar'],
+          datasets: [{
+            data: [stats.todayStockIns || 1, stats.todayStockOuts || 1, stats.suppliers || 1],
+            backgroundColor: ['#2563eb', '#d97706', '#059669'],
+            borderWidth: 0, hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { color: textColor, padding: 16, font: { size: 12 } } } }
+        }
+      });
+    }
 
-  loadDashboard();
-</script>
+    loadDashboard();
+  </script>
 </body>
+
 </html>

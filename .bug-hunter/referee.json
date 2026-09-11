@@ -1,118 +1,58 @@
-{
-  "timestamp": "2026-09-08T15:43:00.000Z",
-  "referee": "bug-hunter-referee",
-  "verdicts": [
-    {
-      "id": "BH-001",
-      "verdict": "REAL_BUG",
-      "severity": "CRITICAL",
-      "confidence": "HIGH",
-      "remediationRecommendation": "Remove roleId from req.body in register endpoint; default to lowest privileged role or restrict user creation solely to authenticated admins."
-    },
-    {
-      "id": "BH-002",
-      "verdict": "REAL_BUG",
-      "severity": "HIGH",
-      "confidence": "HIGH",
-      "remediationRecommendation": "Sanitize and redact sensitive keys (password, newPassword, currentPassword, token) before serializing req.body in auditLog middleware."
-    },
-    {
-      "id": "BH-003",
-      "verdict": "REAL_BUG",
-      "severity": "HIGH",
-      "confidence": "HIGH",
-      "remediationRecommendation": "Update layout.js sidebar rendering to show Omborxona (stock-in, stock-out, inventory) and Suppliers for Operator role or check granular permissions using Auth.hasPermission()."
-    },
-    {
-      "id": "BH-004",
-      "verdict": "REAL_BUG",
-      "severity": "HIGH",
-      "confidence": "HIGH",
-      "remediationRecommendation": "Use row-level locking (tx.$queryRaw`SELECT * FROM \"Product\" WHERE id = ${productId} FOR UPDATE`) or atomic decrement update (currentStock: { decrement: quantityDecimal }) with DB check constraint."
-    },
-    {
-      "id": "BH-005",
-      "verdict": "REAL_BUG",
-      "severity": "HIGH",
-      "confidence": "HIGH",
-      "remediationRecommendation": "In updateStockIn, verify that if (newStock < 0) throw new Error('Omborda yetarli mahsulot yo\\'q')."
-    },
-    {
-      "id": "BH-006",
-      "verdict": "REAL_BUG",
-      "severity": "MEDIUM",
-      "confidence": "HIGH",
-      "remediationRecommendation": "Whitelist allowed sortBy columns and sortOrder values ('asc', 'desc') in controllers, and handle PrismaClientValidationError gracefully in errorHandler.js."
-    },
-    {
-      "id": "BH-007",
-      "verdict": "REAL_BUG",
-      "severity": "MEDIUM",
-      "confidence": "HIGH",
-      "remediationRecommendation": "Use JSON.stringify(name).replace(/\"/g, '&quot;') or data attributes (data-id and data-name with addEventListener) instead of inline single-quoted onclick strings."
-    },
-    {
-      "id": "BH-008",
-      "verdict": "REAL_BUG",
-      "severity": "MEDIUM",
-      "confidence": "HIGH",
-      "remediationRecommendation": "Set API_BASE = window.location.origin + '/api' or use relative path '/api'."
-    },
-    {
-      "id": "BH-009",
-      "verdict": "REAL_BUG",
-      "severity": "MEDIUM",
-      "confidence": "HIGH",
-      "remediationRecommendation": "Check if product or supplier has dependent transactions before deleting, or switch to soft-delete (isActive: false), and handle Prisma P2003 error code in errorHandler.js."
-    },
-    {
-      "id": "BH-010",
-      "verdict": "REAL_BUG",
-      "severity": "LOW",
-      "confidence": "HIGH",
-      "remediationRecommendation": "In notification.routes.js update query, add condition where: { id, userId: req.user.id } or check admin privileges."
-    },
-    {
-      "id": "BH-011",
-      "verdict": "REAL_BUG",
-      "severity": "LOW",
-      "confidence": "HIGH",
-      "remediationRecommendation": "Implement PUT /api/notifications/read-all on backend and invoke it in Layout.markAllRead()."
-    },
-    {
-      "id": "BH-012",
-      "verdict": "REAL_BUG",
-      "severity": "MEDIUM",
-      "confidence": "HIGH",
-      "remediationRecommendation": "Create low-stock notifications with userId: null (broadcast) or notify all admin users."
-    },
-    {
-      "id": "BH-013",
-      "verdict": "REAL_BUG",
-      "severity": "MEDIUM",
-      "confidence": "HIGH",
-      "remediationRecommendation": "Add validation rules in product.routes.js PUT route for purchasePrice, salePrice, and minStock with isFloat({ min: 0 })."
-    },
-    {
-      "id": "BH-014",
-      "verdict": "REAL_BUG",
-      "severity": "LOW",
-      "confidence": "HIGH",
-      "remediationRecommendation": "Remove unused express-session and cookieParser from server.js to conserve memory and avoid security misconfigurations."
-    },
-    {
-      "id": "BH-015",
-      "verdict": "REAL_BUG",
-      "severity": "MEDIUM",
-      "confidence": "HIGH",
-      "remediationRecommendation": "Call await prisma.session.deleteMany({ where: { userId: id } }) when password is reset by admin in user.controller.js."
-    },
-    {
-      "id": "BH-016",
-      "verdict": "REAL_BUG",
-      "severity": "LOW",
-      "confidence": "HIGH",
-      "remediationRecommendation": "Normalize endDate in backend routes by setting time to 23:59:59.999 before applying gte/lte filters."
-    }
-  ]
-}
+[
+  {
+    "bugId": "BH2-001",
+    "verdict": "REAL_BUG",
+    "calibratedSeverity": "High",
+    "rationale": "Directly tested route definition: /api/stock-outs does not exist. Any inventory write-off attempt from the UI produces a 404 failure.",
+    "remediation": "Update inventory.ejs to post to /stock-out and add an alias in server.js."
+  },
+  {
+    "bugId": "BH2-002",
+    "verdict": "REAL_BUG",
+    "calibratedSeverity": "Medium",
+    "rationale": "'chala' is standard Uzbek vocabulary for partial/incomplete products. Censoring it falsely blocks legitimate business entries.",
+    "remediation": "Remove 'chala' from PROFANITY_PATTERNS in contentModerator.js."
+  },
+  {
+    "bugId": "BH2-003",
+    "verdict": "REAL_BUG",
+    "calibratedSeverity": "High",
+    "rationale": "Missing fallback defaults in updateStockIn/updateStockOut generate NaN calculations and Prisma validation crashes.",
+    "remediation": "Default undefined quantity and price to existing record values."
+  },
+  {
+    "bugId": "BH2-004",
+    "verdict": "REAL_BUG",
+    "calibratedSeverity": "Medium",
+    "rationale": "Direct mismatch between logged module name ('stock') and UI filter ('stock_in', 'stock_out'). Stats always render 0.",
+    "remediation": "Update audit-logs.ejs to check for module === 'stock' and action prefix, plus add translation mappings."
+  },
+  {
+    "bugId": "BH2-005",
+    "verdict": "REAL_BUG",
+    "calibratedSeverity": "Medium",
+    "rationale": "Serving HTML 404 pages on /api/* routes violates REST architecture and can confuse HTTP client parsers.",
+    "remediation": "Add an API-specific 404 handler returning JSON for /api/* requests before rendering HTML 404."
+  },
+  {
+    "bugId": "BH2-006",
+    "verdict": "REAL_BUG",
+    "calibratedSeverity": "Medium",
+    "rationale": "Empirically confirmed: negative skip causes Prisma engine assertion failure and unhandled 500 crashes.",
+    "remediation": "Enforce Math.max(1, parseInt(page) || 1) across all paginated controllers."
+  },
+  {
+    "bugId": "BH2-007",
+    "verdict": "REAL_BUG",
+    "calibratedSeverity": "Low",
+    "rationale": "Cookie fallback exists in auth middleware but is dormant because login/logout doesn't set/clear cookies.",
+    "remediation": "Set httpOnly accessToken cookie on login/refresh and clear on logout."
+  },
+  {
+    "bugId": "BH2-008",
+    "verdict": "REAL_BUG",
+    "calibratedSeverity": "Medium",
+    "rationale": "In-memory filtering of 20 pre-sliced items produces incomplete results and wrong pagination.",
+    "remediation": "Support status filtering or pass active/stock query parameters properly."
+  }
+]

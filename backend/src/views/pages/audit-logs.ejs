@@ -173,8 +173,8 @@
       const allLogs = await api.get('/audit-logs', { limit: 10000 });
       const logs = allLogs.data;
       
-      const stockInCount = logs.filter(l => l.module === 'stock_in').length;
-      const stockOutCount = logs.filter(l => l.module === 'stock_out').length;
+      const stockInCount = logs.filter(l => l.module === 'stock_in' || (l.module === 'stock' && String(l.action).startsWith('in'))).length;
+      const stockOutCount = logs.filter(l => l.module === 'stock_out' || (l.module === 'stock' && String(l.action).startsWith('out'))).length;
       const uniqueUsers = new Set(logs.map(l => l.userId)).size;
       
       document.getElementById('stock-in-count').textContent = Utils.formatNumber(stockInCount);
@@ -224,6 +224,7 @@
       'suppliers': 'Yetkazib beruvchilar',
       'stock_in': 'Kirim',
       'stock_out': 'Chiqim',
+      'stock': 'Omborxona',
       'users': 'Foydalanuvchilar',
       'settings': 'Sozlamalar',
       'audit': 'Audit'
@@ -238,7 +239,13 @@
       'delete': 'O\'chirish',
       'login': 'Kirish',
       'logout': 'Chiqish',
-      'read': 'Ko\'rish'
+      'read': 'Ko\'rish',
+      'in': 'Kirim',
+      'out': 'Chiqim',
+      'in-update': 'Kirim tuzatish',
+      'out-update': 'Chiqim tuzatish',
+      'in-delete': 'Kirim o\'chirish',
+      'out-delete': 'Chiqim o\'chirish'
     };
     return names[action] || action;
   }
@@ -250,7 +257,13 @@
       'delete': 'badge-danger',
       'login': 'badge-info',
       'logout': 'badge-secondary',
-      'read': 'badge-primary'
+      'read': 'badge-primary',
+      'in': 'badge-success',
+      'out': 'badge-warning',
+      'in-update': 'badge-info',
+      'out-update': 'badge-info',
+      'in-delete': 'badge-danger',
+      'out-delete': 'badge-danger'
     };
     return badges[action] || 'badge-secondary';
   }

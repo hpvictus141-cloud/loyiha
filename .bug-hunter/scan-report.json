@@ -1,177 +1,89 @@
 {
   "project": "Omborxona Boshqaruv Tizimi",
-  "generatedAt": "2026-09-08T15:43:30.000Z",
-  "mode": "scan-only",
+  "generatedAt": "2026-09-11T12:31:00.000Z",
+  "mode": "adversarial-audit",
   "stats": {
-    "totalDiscovered": 16,
-    "confirmed": 16,
+    "totalDiscovered": 8,
+    "confirmed": 8,
     "dismissed": 0,
-    "critical": 1,
-    "high": 4,
-    "medium": 7,
-    "low": 4
+    "critical": 0,
+    "high": 2,
+    "medium": 5,
+    "low": 1
   },
-  "summary": "Professional security and code audit performed according to Bug Hunter adversarial protocol. Discovered 1 Critical privilege escalation vulnerability, 4 High severity vulnerabilities (Plaintext credentials in logs, Operator UI lockout, Concurrency stock overdraw, and Negative inventory bug), 7 Medium severity issues, and 4 Low severity flaws.",
+  "summary": "Bug Hunter ikkinchi bosqich chuqur adversarial auditi natijasida 8 ta yangi tasdiqlangan haqiqiy nuqsonlar (2 ta High, 5 ta Medium, 1 ta Low) aniqlandi. Barcha xatoliklar aniq kod satrlari, reproduktsiya yo'llari va tuzatish yechimlari bilan hujjatlashtirildi.",
   "findings": [
     {
-      "id": "BH-001",
-      "verdict": "CONFIRMED",
-      "severity": "CRITICAL",
-      "title": "Unauthenticated Privilege Escalation via Role Assignment in Register",
-      "file": "backend/src/controllers/auth.controller.js",
-      "lines": "7-64",
-      "cwe": "CWE-269",
-      "impact": "Unauthenticated users can grant themselves Admin privileges"
-    },
-    {
-      "id": "BH-002",
+      "id": "BH2-001",
       "verdict": "CONFIRMED",
       "severity": "HIGH",
-      "title": "Plaintext Passwords Logged in Audit Trail Table",
-      "file": "backend/src/middleware/auditLog.js",
-      "lines": "15-21",
-      "cwe": "CWE-532",
-      "impact": "User passwords visible in plaintext to anyone with audit access"
+      "title": "Chiqindiga tashlash (Dispose) formasi mavjud bo'lmagan /stock-outs endpointiga so'rov yuborib 404 berishi",
+      "file": "backend/src/views/pages/inventory.ejs",
+      "lines": "353-362",
+      "impact": "Ombor qoldig'i sahifasida yaroqsiz tovarlarni chiqindiga chiqarish ishlamaydi"
     },
     {
-      "id": "BH-003",
+      "id": "BH2-002",
       "verdict": "CONFIRMED",
-      "severity": "HIGH",
-      "title": "Operator Role Locked Out of Core Warehouse Menus in Sidebar Navigation",
-      "file": "frontend/assets/js/layout.js",
-      "lines": "52-103",
-      "cwe": "CWE-284",
-      "impact": "Operators cannot see or access StockIn, StockOut, Inventory, or Suppliers in UI"
+      "severity": "MEDIUM",
+      "title": "Nomaqbul so'zlar filtrida o'zbekcha 'chala' (chala mahsulot, to'liq emas) so'zi xato taqiqlanganligi",
+      "file": "backend/src/middleware/contentModerator.js",
+      "lines": "37",
+      "impact": "'chala' so'zi ishlatilgan har qanday tovar yoki izoh 400 xatolik bilan asossiz bloklanadi"
     },
     {
-      "id": "BH-004",
+      "id": "BH2-003",
       "verdict": "CONFIRMED",
       "severity": "HIGH",
-      "title": "Stock Overdraw Race Condition in StockOut Transactions",
-      "file": "backend/src/controllers/stockOut.controller.js",
-      "lines": "118-167",
-      "cwe": "CWE-362",
-      "impact": "Concurrent requests cause inventory desynchronization and overselling"
-    },
-    {
-      "id": "BH-005",
-      "verdict": "CONFIRMED",
-      "severity": "HIGH",
-      "title": "Negative Inventory Stock Permitted on StockIn Quantity Updates",
+      "title": "updateStockIn va updateStockOut'da qisman yangilashda yangi miqdor/narx berilmasa NaN va baza xatosi chiqishi",
       "file": "backend/src/controllers/stockIn.controller.js",
-      "lines": "271-280",
-      "cwe": "CWE-840",
-      "impact": "Stock records can drop below zero without validation error"
+      "lines": "316-324",
+      "impact": "Tahrirlash vaqtida qoldiq NaN ga aylanib ketishi yoki Prisma validatsiya xatosi bilan to'xtashi"
     },
     {
-      "id": "BH-006",
+      "id": "BH2-004",
       "verdict": "CONFIRMED",
       "severity": "MEDIUM",
-      "title": "Unhandled PrismaClientValidationError and Database Schema Disclosure via sortBy",
-      "file": "backend/src/controllers/product.controller.js",
-      "lines": "10-40",
-      "cwe": "CWE-209",
-      "impact": "Internal database structure leaked in 500 error responses"
+      "title": "Audit loglar sahifasida Kirim va Chiqim amallari soni doimiy 0 ko'rsatishi (modul nomi nomutanosibligi)",
+      "file": "backend/src/views/pages/audit-logs.ejs",
+      "lines": "176-177",
+      "impact": "Harakatlar tarixi statistikasida kirim va chiqim hisoblagichlari 0 bo'lib qoladi"
     },
     {
-      "id": "BH-007",
+      "id": "BH2-005",
       "verdict": "CONFIRMED",
       "severity": "MEDIUM",
-      "title": "JavaScript Syntax Error in Table Action Buttons for Uzbek Names with Apostrophes",
-      "file": "backend/src/views/pages/products.ejs",
-      "lines": "250",
-      "cwe": "CWE-79",
-      "impact": "Delete button breaks with JavaScript crash on items with apostrophes (e.g. Bo'yoq)"
-    },
-    {
-      "id": "BH-008",
-      "verdict": "CONFIRMED",
-      "severity": "MEDIUM",
-      "title": "Hardcoded http://localhost:3010/api Host Breaks Remote/LAN/Production Use",
-      "file": "frontend/assets/js/api.js",
-      "lines": "1",
-      "cwe": "CWE-1188",
-      "impact": "Clients connecting via IP or domain cannot reach backend API"
-    },
-    {
-      "id": "BH-009",
-      "verdict": "CONFIRMED",
-      "severity": "MEDIUM",
-      "title": "Foreign Key 500 Crash on Deleting Products and Suppliers with Transaction History",
-      "file": "backend/src/controllers/product.controller.js",
-      "lines": "187-202",
-      "cwe": "CWE-20",
-      "impact": "Unhandled P2003 error when trying to delete items with stock records"
-    },
-    {
-      "id": "BH-010",
-      "verdict": "CONFIRMED",
-      "severity": "LOW",
-      "title": "Insecure Direct Object Reference (IDOR) on Notifications",
-      "file": "backend/src/routes/notification.routes.js",
-      "lines": "26-39",
-      "cwe": "CWE-639",
-      "impact": "Any user can mark other users' notifications as read"
-    },
-    {
-      "id": "BH-011",
-      "verdict": "CONFIRMED",
-      "severity": "LOW",
-      "title": "Mark All Read in Notification Panel is a Mock UI Without Backend API",
-      "file": "frontend/assets/js/layout.js",
-      "lines": "299-302",
-      "cwe": "CWE-404",
-      "impact": "Notifications are not actually cleared in database"
-    },
-    {
-      "id": "BH-012",
-      "verdict": "CONFIRMED",
-      "severity": "MEDIUM",
-      "title": "Low-Stock Warning Alerts Routed Only to Acting User Instead of Admins",
-      "file": "backend/src/controllers/stockIn.controller.js",
-      "lines": "190-198",
-      "cwe": "CWE-840",
-      "impact": "Warehouse administrators miss urgent low-stock warnings"
-    },
-    {
-      "id": "BH-013",
-      "verdict": "CONFIRMED",
-      "severity": "MEDIUM",
-      "title": "Missing Validation on Product Update Allows Negative Prices and NaN Crash",
-      "file": "backend/src/routes/product.routes.js",
-      "lines": "31-34",
-      "cwe": "CWE-20",
-      "impact": "Invalid price inputs cause 500 crash or negative values in database"
-    },
-    {
-      "id": "BH-014",
-      "verdict": "CONFIRMED",
-      "severity": "LOW",
-      "title": "Unused MemoryStore Session Middleware Leaking Memory",
+      "title": "API so'rovlari uchun mavjud bo'lmagan yo'nalishlarda JSON o'rniga HTML 404 sahifasi qaytarilishi",
       "file": "backend/src/server.js",
-      "lines": "60-69",
-      "cwe": "CWE-400",
-      "impact": "Memory leak and unnecessary session overhead"
+      "lines": "270-275",
+      "impact": "Frontend va tashqi API mijozlari HTML javob olib JSON parsing xatolariga uchrashi"
     },
     {
-      "id": "BH-015",
+      "id": "BH2-006",
       "verdict": "CONFIRMED",
       "severity": "MEDIUM",
-      "title": "Password Reset via Admin Does Not Invalidate Active User Sessions",
-      "file": "backend/src/controllers/user.controller.js",
-      "lines": "315-348",
-      "cwe": "CWE-613",
-      "impact": "Compromised account tokens remain valid after password change"
+      "title": "Paginatsiyada page=0 yoki manfiy qiymat kelganda Prisma Assertion va 500 server xatosi yuz berishi",
+      "file": "backend/src/controllers/product.controller.js",
+      "lines": "15",
+      "impact": "Noto'g'ri yoki 0-sahifa so'ralganda butun so'rov 500 xatosi bilan qulaydi"
     },
     {
-      "id": "BH-016",
+      "id": "BH2-007",
       "verdict": "CONFIRMED",
       "severity": "LOW",
-      "title": "End Date Filter Truncates Full Day Records in Reports",
-      "file": "backend/src/routes/report.routes.js",
-      "lines": "33-37",
-      "cwe": "CWE-840",
-      "impact": "Transactions made during the selected end date are omitted"
+      "title": "Login vaqtida accessToken cookie o'rnatilmasligi va logoutda tozalanmasligi",
+      "file": "backend/src/controllers/auth.controller.js",
+      "lines": "153-161",
+      "impact": "Cookie orqali avtorizatsiya mexanizmi ishlamay qolishi"
+    },
+    {
+      "id": "BH2-008",
+      "verdict": "CONFIRMED",
+      "severity": "MEDIUM",
+      "title": "Inventarizatsiya sahifasida status filtri serverga ulanmaganligi va keyingi sahifalardagi tovarlar ko'rinmay qolishi",
+      "file": "backend/src/views/pages/inventory.ejs",
+      "lines": "210, 219-221",
+      "impact": "Foydalanuvchi filtr tanlaganda keyingi sahifalardagi yaroqsiz tovarlar e'tibordan chetda qoladi"
     }
   ]
 }

@@ -34,7 +34,7 @@ const PROFANITY_PATTERNS = [
   /(?<![\p{L}\p{N}])(amxona|amxo'r|амхона)(?![\p{L}\p{N}])/iu,
   /(?<![\p{L}\p{N}])(sheshangni|pochangni|шешангни)(?![\p{L}\p{N}])/iu,
   /(?<![\p{L}\p{N}])(ogzingga|ogzinga|огзингга|оғзингга)(?![\p{L}\p{N}])/iu,
-  /(?<![\p{L}\p{N}])(chala|dalban)(?![\p{L}\p{N}])/iu
+  /(?<![\p{L}\p{N}])(dalban)(?![\p{L}\p{N}])/iu
 ];
 
 /**

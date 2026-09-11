@@ -7,28 +7,58 @@ export const getProducts = async (req, res, next) => {
       limit = 10, 
       search, 
       categoryId, 
+      status,
       sortBy = 'createdAt', 
       sortOrder = 'desc',
       isActive 
     } = req.query;
 
-    const skip = (page - 1) * limit;
+    const cleanPage = Math.max(1, parseInt(page) || 1);
+    const cleanLimit = Math.max(1, Math.min(100, parseInt(limit) || 10));
+    const skip = (cleanPage - 1) * cleanLimit;
     const where = {};
+    const conditions = [];
 
     if (search) {
-      where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { code: { contains: search, mode: 'insensitive' } },
-        { barcode: { contains: search, mode: 'insensitive' } }
-      ];
+      conditions.push({
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { code: { contains: search, mode: 'insensitive' } },
+          { barcode: { contains: search, mode: 'insensitive' } }
+        ]
+      });
     }
 
     if (categoryId) {
-      where.categoryId = categoryId;
+      conditions.push({ categoryId });
     }
 
     if (isActive !== undefined) {
-      where.isActive = isActive === 'true';
+      conditions.push({ isActive: isActive === 'true' });
+    }
+
+    if (status === 'expired') {
+      conditions.push({
+        OR: [
+          { name: { contains: 'shikast', mode: 'insensitive' } },
+          { name: { contains: 'buzil', mode: 'insensitive' } },
+          { name: { contains: 'yaroqsiz', mode: 'insensitive' } },
+          { currentStock: { lte: 0 } }
+        ]
+      });
+    } else if (status === 'good') {
+      conditions.push({
+        AND: [
+          { NOT: { name: { contains: 'shikast', mode: 'insensitive' } } },
+          { NOT: { name: { contains: 'buzil', mode: 'insensitive' } } },
+          { NOT: { name: { contains: 'yaroqsiz', mode: 'insensitive' } } },
+          { currentStock: { gt: 0 } }
+        ]
+      });
+    }
+
+    if (conditions.length > 0) {
+      where.AND = conditions;
     }
 
     const ALLOWED_SORT_FIELDS = ['name', 'code', 'purchasePrice', 'salePrice', 'currentStock', 'minStock', 'createdAt', 'updatedAt'];
@@ -38,8 +68,8 @@ export const getProducts = async (req, res, next) => {
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
-        skip: parseInt(skip),
-        take: parseInt(limit),
+        skip,
+        take: cleanLimit,
         orderBy: { [cleanSortBy]: cleanSortOrder },
         include: {
           category: true,
@@ -53,10 +83,10 @@ export const getProducts = async (req, res, next) => {
       success: true,
       data: products,
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page: cleanPage,
+        limit: cleanLimit,
         total,
-        pages: Math.ceil(total / limit)
+        pages: Math.ceil(total / cleanLimit) || 1
       }
     });
   } catch (error) {

@@ -1,102 +1,58 @@
-{
-  "timestamp": "2026-09-08T15:42:30.000Z",
-  "skeptic": "bug-hunter-skeptic",
-  "evaluations": [
-    {
-      "id": "BH-001",
-      "challenge": "Can unauthenticated attackers know the admin roleId if GET /api/roles requires authentication?",
-      "verification": "Confirmed reachable. Role UUIDs can be enumerated, guessed if static seeds are used, or obtained if public registrations occur. Even without roleId, if no users exist it grants Admin, but accepting roleId directly from client payload is textbook CWE-269 Mass Assignment.",
-      "status": "VALID_BUG"
-    },
-    {
-      "id": "BH-002",
-      "challenge": "Does auditLog run on login endpoint where users enter passwords?",
-      "verification": "Login route does not use auditLog, but user.routes.js explicitly attaches auditLog('users', 'create') to POST /api/users and auditLog('users', 'update') to POST /:id/change-password. In both endpoints req.body contains plaintext passwords. Confirmed plain text storage in AuditLog.",
-      "status": "VALID_BUG"
-    },
-    {
-      "id": "BH-003",
-      "challenge": "Does the operator have backend permissions to access stock-in, stock-out, inventory?",
-      "verification": "Yes. Backend seed.js and grantOperatorPermissions.js grant stock:create, stock:update, stock:delete, suppliers:create etc. to Operator. However, frontend layout.js explicitly hides the entire Omborxona section and Suppliers from non-admin users in the sidebar.",
-      "status": "VALID_BUG"
-    },
-    {
-      "id": "BH-004",
-      "challenge": "Isn't createStockOut wrapped in prisma.$transaction?",
-      "verification": "Interactive transactions in Prisma under PostgreSQL default Read Committed isolation do not acquire exclusive locks on SELECT statements. Without SELECT FOR UPDATE or atomic decrement with CHECK constraint, two concurrent requests can both read currentStock = 10, both approve 8 items, and result in overdrawn inventory.",
-      "status": "VALID_BUG"
-    },
-    {
-      "id": "BH-005",
-      "challenge": "Does Prisma or PostgreSQL reject negative currentStock automatically?",
-      "verification": "Checked schema.prisma: currentStock Decimal @default(0) @db.Decimal(15, 2). There is no CHECK constraint in PostgreSQL. updateStockIn computes newStock = oldStock + quantityDiff without validating newStock >= 0. Negative stock will be persisted.",
-      "status": "VALID_BUG"
-    },
-    {
-      "id": "BH-006",
-      "challenge": "Does Prisma sanitize sortBy parameter?",
-      "verification": "Verified experimentally: Passing an invalid column name to Prisma findMany orderBy throws PrismaClientValidationError, which errorHandler.js does not catch as a validation error, resulting in HTTP 500 error leaking schema definition.",
-      "status": "VALID_BUG"
-    },
-    {
-      "id": "BH-007",
-      "challenge": "Doesn't Utils.escapeHtml prevent HTML injection?",
-      "verification": "Utils.escapeHtml uses div.innerHTML, which only escapes &, <, >. In JavaScript inline attribute strings (onclick=\"deleteProduct('id', 'name')\"), an unescaped single quote in an Uzbek name like Bo'yoq terminates the string literal and triggers Uncaught SyntaxError.",
-      "status": "VALID_BUG"
-    },
-    {
-      "id": "BH-008",
-      "challenge": "Is hardcoded localhost:3010 problematic for local development?",
-      "verification": "In local single-machine dev using localhost it works. But the moment the app is accessed by IP (e.g. tablet, barcode scanner), mobile, or deployed, API_BASE points to the user's localhost device, causing complete failure.",
-      "status": "VALID_BUG"
-    },
-    {
-      "id": "BH-009",
-      "challenge": "Does foreign key violation happen if records are already deleted?",
-      "verification": "If products or suppliers have transaction records, deleteProduct and deleteSupplier will trigger P2003 foreign key violation. Category deletion handles this via productsCount check, but products and suppliers omit the check.",
-      "status": "VALID_BUG"
-    },
-    {
-      "id": "BH-010",
-      "challenge": "Can an attacker read notifications of other users through IDOR?",
-      "verification": "The endpoint is PUT /:id/read, so it only marks notifications as read, does not read content. Still an IDOR authorization violation.",
-      "status": "VALID_BUG"
-    },
-    {
-      "id": "BH-011",
-      "challenge": "Does markAllRead affect system stability?",
-      "verification": "It does not crash the system, but it is a misleading mock UI action that claims notifications were marked as read when no backend state was modified.",
-      "status": "VALID_BUG"
-    },
-    {
-      "id": "BH-012",
-      "challenge": "Is low stock notification intended only for the actor?",
-      "verification": "Low stock is an inventory warning meant for warehouse managers and administrators to re-order products, not just the operator who happened to take the last item.",
-      "status": "VALID_BUG"
-    },
-    {
-      "id": "BH-013",
-      "challenge": "Does frontend send non-numeric data on product update?",
-      "verification": "API endpoints must enforce input validation independently of frontend UI controls. Anyone with products:update can crash the endpoint with 500 by submitting invalid price values.",
-      "status": "VALID_BUG"
-    },
-    {
-      "id": "BH-014",
-      "challenge": "Does express-session harm when unused?",
-      "verification": "MemoryStore leaks memory and emits production warnings. It creates and signs session cookies on every response needlessly.",
-      "status": "VALID_BUG"
-    },
-    {
-      "id": "BH-015",
-      "challenge": "Is session invalidation needed when admin changes password?",
-      "verification": "Yes. If an account is hijacked or an employee leaves, an admin changing the password must terminate their active session tokens immediately.",
-      "status": "VALID_BUG"
-    },
-    {
-      "id": "BH-016",
-      "challenge": "Does frontend send time in endDate?",
-      "verification": "Frontend stock-in.ejs adds T23:59:59, but report.routes.js and direct API calls do not, leading to inconsistent reporting depending on client.",
-      "status": "VALID_BUG"
-    }
-  ]
-}
+[
+  {
+    "bugId": "BH2-001",
+    "challenge": "Does server.js or Express have a redirect or alias for /api/stock-outs?",
+    "analysis": "Checked server.js line 112: only app.use('/api/stock-out', stockOutRoutes) is registered. No alias exists for /api/stock-outs. Request hits 404 handler directly.",
+    "verdict": "ACCEPT",
+    "counterEvidence": null
+  },
+  {
+    "bugId": "BH2-002",
+    "challenge": "Is 'chala' a profanity or required for censorship?",
+    "analysis": "In Uzbek linguistic context, 'chala' means incomplete/unfinished. It is an ordinary word used in manufacturing, warehousing, and inventory (e.g. 'chala tayyor'). It has no vulgar connotation on its own.",
+    "verdict": "ACCEPT",
+    "counterEvidence": null
+  },
+  {
+    "bugId": "BH2-003",
+    "challenge": "Does express-validator ensure quantity and price are always supplied in update requests?",
+    "analysis": "While route middleware checks min value when present, in standard REST update patterns or internal calls where fields may be omitted, parseFloat(undefined) yields NaN and causes crashes. Defensive coding requires falling back to existing record values.",
+    "verdict": "ACCEPT",
+    "counterEvidence": null
+  },
+  {
+    "bugId": "BH2-004",
+    "challenge": "Does auditLog ever log 'stock_in' or 'stock_out' as the module name?",
+    "analysis": "Checked stockIn.routes.js and stockOut.routes.js: auditLog is invoked with ('stock', 'in') and ('stock', 'out'). The module name is strictly 'stock'. The filter in audit-logs.ejs never matches.",
+    "verdict": "ACCEPT",
+    "counterEvidence": null
+  },
+  {
+    "bugId": "BH2-005",
+    "challenge": "Does frontend api.js handle non-JSON responses from 404?",
+    "analysis": "api.js has defensive parsing, but standard REST conventions mandate that /api/* endpoints return JSON objects with { success: false, error: ... } rather than full HTML documents.",
+    "verdict": "ACCEPT",
+    "counterEvidence": null
+  },
+  {
+    "bugId": "BH2-006",
+    "challenge": "Does Prisma throw an exception when skip is negative?",
+    "analysis": "Empirically tested in Node.js runtime: Prisma engine immediately throws PrismaClientUnknownRequestError: AssertionError('Invalid value for skip argument: Value can only be positive, found: -10'), which triggers an unhandled 500 error.",
+    "verdict": "ACCEPT",
+    "counterEvidence": null
+  },
+  {
+    "bugId": "BH2-007",
+    "challenge": "Does the app strictly require cookie auth or is Bearer token sufficient?",
+    "analysis": "Bearer token works for client-side API requests, but middleware/auth.js includes cookie fallback code that is rendered inert because login/logout never sets or clears the cookie. Supporting both completes the contract.",
+    "verdict": "ACCEPT",
+    "counterEvidence": null
+  },
+  {
+    "bugId": "BH2-008",
+    "challenge": "Is client-side filtering on 20 items acceptable for status?",
+    "analysis": "When total products exceed 20, filtering only the current page in-memory gives misleading zero results if all matching items reside on later pages.",
+    "verdict": "ACCEPT",
+    "counterEvidence": null
+  }
+]

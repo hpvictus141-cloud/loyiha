@@ -110,6 +110,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/stock-in', stockInRoutes);
 app.use('/api/stock-out', stockOutRoutes);
+app.use('/api/stock-outs', stockOutRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/settings', settingsRoutes);
@@ -268,6 +269,13 @@ app.get('/settings', (req, res) => {
 
 // 404 handler
 app.use((req, res) => {
+  if (req.path.startsWith('/api') || req.originalUrl.startsWith('/api')) {
+    return res.status(404).json({
+      success: false,
+      error: 'Endpoint topilmadi',
+      message: 'So\'ralgan API endpoint topilmadi'
+    });
+  }
   res.status(404).render('pages/404', {
     title: '404 - Sahifa topilmadi',
     page: '404'

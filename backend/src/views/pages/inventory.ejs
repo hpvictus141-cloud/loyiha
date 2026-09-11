@@ -216,15 +216,11 @@
         totalValue: (parseFloat(p.currentStock) || 0) * (parseFloat(p.salePrice) || 0)
       }));
 
-      if (st) {
-        products = products.filter(p => p.status === st);
-      }
-      
       renderTable(products);
       updateStats(products);
       
       const p = data.pagination;
-      document.getElementById('total-count').textContent = `Jami: ${products.length} ta`;
+      document.getElementById('total-count').textContent = `Jami: ${p ? p.total : products.length} ta`;
       
       const paginationEl = document.getElementById('pagination');
       paginationEl.innerHTML = Utils.generatePaginationHTML(p);
@@ -351,7 +347,7 @@
     
     try {
       // Create stock out for disposal
-      await api.post('/stock-outs', {
+      await api.post('/stock-out', {
         productId: disposingProduct.id,
         quantity: quantity,
         recipientName: 'Chiqindi',

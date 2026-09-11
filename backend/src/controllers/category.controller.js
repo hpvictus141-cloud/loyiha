@@ -9,7 +9,9 @@ export const getCategories = async (req, res, next) => {
       isActive 
     } = req.query;
 
-    const skip = (page - 1) * limit;
+    const cleanPage = Math.max(1, parseInt(page) || 1);
+    const cleanLimit = Math.max(1, Math.min(200, parseInt(limit) || 100));
+    const skip = (cleanPage - 1) * cleanLimit;
     const where = {};
 
     if (search) {
@@ -23,8 +25,8 @@ export const getCategories = async (req, res, next) => {
     const [categories, total] = await Promise.all([
       prisma.category.findMany({
         where,
-        skip: parseInt(skip),
-        take: parseInt(limit),
+        skip,
+        take: cleanLimit,
         orderBy: { name: 'asc' },
         include: {
           _count: {
@@ -39,10 +41,10 @@ export const getCategories = async (req, res, next) => {
       success: true,
       data: categories,
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page: cleanPage,
+        limit: cleanLimit,
         total,
-        pages: Math.ceil(total / limit)
+        pages: Math.ceil(total / cleanLimit) || 1
       }
     });
   } catch (error) {
